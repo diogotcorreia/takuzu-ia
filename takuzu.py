@@ -2,9 +2,9 @@
 # Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
 # Além das funções e classes já definidas, podem acrescentar outras que considerem pertinentes.
 
-# Grupo 00:
-# 00000 Nome1
-# 00000 Nome2
+# Grupo 03:
+# 99209 Diogo Romão Cardoso
+# 99211 Diogo Torres Correia
 
 import sys
 from search import (
@@ -70,6 +70,7 @@ class Board:
 
 
 class Takuzu(Problem):
+
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
         # TODO
