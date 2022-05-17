@@ -53,6 +53,9 @@ class Board:
         respectivamente."""
         return (self.get_number(row, col - 1), self.get_number(row, col + 1))
 
+    def __repr__(self):
+        return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
+
     @staticmethod
     def parse_instance_from_stdin():
         """Lê o test do standard input (stdin) que é passado como argumento
