@@ -117,4 +117,6 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
     board = Board.parse_instance_from_stdin()
     takuzu = Takuzu(board)
+    goal_node = depth_first_tree_search(takuzu)
+    print(goal_node.state.board)
     pass
