@@ -34,6 +34,9 @@ class TakuzuState:
 
 class Board:
     """Representação interna de um tabuleiro de Takuzu."""
+    def __init__(self, cells):
+        self.cells = cells
+        self.size = len(cells)
 
     def get_number(self, row: int, col: int) -> int:
         """Devolve o valor na respetiva posição do tabuleiro."""
@@ -63,8 +66,12 @@ class Board:
             > from sys import stdin
             > stdin.readline()
         """
-        # TODO
-        pass
+        board_size = int(input())
+        cells = []
+        for _ in range(board_size):
+            row = sys.stdin.readline().strip('\n')
+            cells.append(list(map(int, row.split('\t'))))
+        return Board(cells)
 
     # TODO: outros metodos da classe
 
@@ -111,4 +118,5 @@ if __name__ == "__main__":
     # Usar uma técnica de procura para resolver a instância,
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
+    board = Board.parse_instance_from_stdin()
     pass
