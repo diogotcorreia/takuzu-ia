@@ -52,6 +52,13 @@ class Board:
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
         return (self.get_number(row, col - 1), self.get_number(row, col + 1))
+    
+    def set_number(self, row: int, col: int, value: int):
+        """Devolve um novo Board com o novo valor na posição indicada"""
+        new_row = self.cells[row][:col] + [value] + self.cells[row][col + 1:]
+        new_cells = self.cells[:row] + [new_row] + self.cells[row + 1:]
+        
+        return Board(new_cells)
 
     def __repr__(self):
         return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
@@ -95,7 +102,8 @@ class Takuzu(Problem):
         das presentes na lista obtida pela execução de
         self.actions(state)."""
         # TODO
-        pass
+        (row, col, value) = action
+        return TakuzuState(state.board.set_number(row, col, value))
 
     def goal_test(self, state: TakuzuState):
         """Retorna True se e só se o estado passado como argumento é
