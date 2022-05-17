@@ -76,7 +76,8 @@ class Takuzu(Problem):
 
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
-        # TODO
+        state = TakuzuState(board)
+        super().__init__(state)
         pass
 
     def actions(self, state: TakuzuState):
@@ -115,4 +116,5 @@ if __name__ == "__main__":
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
     board = Board.parse_instance_from_stdin()
+    takuzu = Takuzu(board)
     pass
