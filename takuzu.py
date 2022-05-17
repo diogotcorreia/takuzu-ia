@@ -40,20 +40,18 @@ class Board:
 
     def get_number(self, row: int, col: int) -> int:
         """Devolve o valor na respetiva posição do tabuleiro."""
-        # TODO
-        pass
+        if 0 <= row <= self.size and 0 <= col <= self.size:
+            return self.cells[row][col]
 
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
         """Devolve os valores imediatamente abaixo e acima,
         respectivamente."""
-        # TODO
-        pass
+        return (self.get_number(row + 1, col), self.get_number(row - 1, col))
 
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
-        # TODO
-        pass
+        return (self.get_number(row, col - 1), self.get_number(row, col + 1))
 
     @staticmethod
     def parse_instance_from_stdin():
@@ -72,8 +70,6 @@ class Board:
             row = sys.stdin.readline().strip('\n')
             cells.append(list(map(int, row.split('\t'))))
         return Board(cells)
-
-    # TODO: outros metodos da classe
 
 
 class Takuzu(Problem):
