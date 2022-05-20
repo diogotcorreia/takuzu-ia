@@ -55,8 +55,8 @@ class Board:
     
     def set_number(self, row: int, col: int, value: int):
         """Devolve um novo Board com o novo valor na posição indicada"""
-        new_row = self.cells[row][:col] + [value] + self.cells[row][col + 1:]
-        new_cells = self.cells[:row] + [new_row] + self.cells[row + 1:]
+        new_row = self.cells[row][:col] + (value, ) + self.cells[row][col + 1:]
+        new_cells = self.cells[:row] + (new_row, ) + self.cells[row + 1:]
         
         return Board(new_cells)
 
@@ -78,8 +78,8 @@ class Board:
         cells = []
         for _ in range(board_size):
             row = sys.stdin.readline().strip('\n')
-            cells.append(list(map(int, row.split('\t'))))
-        return Board(cells)
+            cells.append(tuple(map(int, row.split('\t'))))
+        return Board(tuple(cells))
 
 
 class Takuzu(Problem):
