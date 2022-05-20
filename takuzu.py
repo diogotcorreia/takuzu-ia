@@ -37,6 +37,16 @@ class Board:
     def __init__(self, cells):
         self.cells = cells
         self.size = len(cells)
+    
+    def calculate_state(self):
+        """Calcula os valores do estado interno, para ser usado
+        no tabuleiro inicial."""
+        self.remaining_cells_count = 0
+        for y in self.cells:
+            for x in y:
+                if x == 2:
+                    self.remaining_cells_count += 1
+        return self
 
     def get_number(self, row: int, col: int) -> int:
         """Devolve o valor na respetiva posição do tabuleiro."""
@@ -58,7 +68,14 @@ class Board:
         new_row = self.cells[row][:col] + (value, ) + self.cells[row][col + 1:]
         new_cells = self.cells[:row] + (new_row, ) + self.cells[row + 1:]
         
-        return Board(new_cells)
+        new_board = Board(new_cells)
+        new_board.remaining_cells_count = self.remaining_cells_count - 1
+        
+        return new_board
+
+    def get_remaining_cells_count(self):
+        """Devolve o número de posições em branco"""
+        return self.remaining_cells_count
 
     def __repr__(self):
         return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
@@ -79,7 +96,7 @@ class Board:
         for _ in range(board_size):
             row = sys.stdin.readline().strip('\n')
             cells.append(tuple(map(int, row.split('\t'))))
-        return Board(tuple(cells))
+        return Board(tuple(cells)).calculate_state()
 
 
 class Takuzu(Problem):
@@ -109,8 +126,7 @@ class Takuzu(Problem):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
         estão preenchidas com uma sequência de números adjacentes."""
-        # TODO
-        pass
+        return state.board.get_remaining_cells_count() == 0
 
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
