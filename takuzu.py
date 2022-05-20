@@ -90,17 +90,17 @@ class Board:
 
         new_row = self.cells[row][:col] + (value, ) + self.cells[row][col + 1:]
         new_cells = self.cells[:row] + (new_row, ) + self.cells[row + 1:]
-        
+
         new_col_counts = self.col_counts[:col] + sum_value_to_count(self.col_counts[col]) \
             + self.col_counts[col + 1:]
         new_row_counts = self.row_counts[:row] + sum_value_to_count(self.row_counts[row]) \
             + self.row_counts[row + 1:]
-        
+
         new_board = Board(new_cells)
         new_board.remaining_cells_count = self.remaining_cells_count - 1
         new_board.col_counts = new_col_counts
         new_board.row_counts = new_row_counts
-        
+
         return new_board
 
     def get_remaining_cells_count(self):
@@ -128,6 +128,59 @@ class Board:
             cells.append(tuple(map(int, row.split('\t'))))
         return Board(tuple(cells)).calculate_state()
 
+class BoardIterator():
+    def __init__(self, board):
+        self.board = board
+    
+    def can_place_col_row(self, counts):
+        """Returns which values can be placed in a column or row"""
+        zeros, ones = counts
+
+        if zeros + ones == self.board.size:
+            # column is full
+            return ()
+        
+        # if more zeros than ones, we can only place ones
+        if zeros > ones:
+            return (1, )
+        # if more ones than zeros, we can only place zeros
+        if ones > zeros:
+            return (0, )
+        # otherwise, we can place either
+        return (0, 1)
+
+    def __iter__(self):
+        self.col = 0
+        self.row = 0
+        # to be used if we calculate more than one value in an interaction
+        self.queue = []
+
+        # FIXME: maybe use iterators instead of tuples
+        self.possible_cols = tuple(
+            self.can_place_col_row(self.board.col_counts[col])
+                for col in range(self.board.size))
+        self.possible_rows = tuple(
+            self.can_place_col_row(self.board.row_counts[row])
+                for row in range(self.board.size))
+        print(self.possible_cols)
+        print(self.possible_rows)
+
+        return self
+
+    def __next__(self):
+        while self.col < self.board.size:
+            while self.row < self.board.size:
+                intersection = tuple(number for number in self.possible_cols[self.col]
+                                if number in self.possible_rows[self.row])
+                if len(intersection) > 0:
+                    # found at least a possible value, return it
+                    self.queue.extend((self.row, self.col, number) for number in intersection)
+                    self.row += 1
+                    return self.queue.pop()
+                self.row += 1
+            self.row = 0
+            self.col += 1
+        raise StopIteration()
 
 class Takuzu(Problem):
 
@@ -140,15 +193,13 @@ class Takuzu(Problem):
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        # TODO
-        pass
+        return BoardIterator(state.board)
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
         self.actions(state)."""
-        # TODO
         (row, col, value) = action
         return TakuzuState(state.board.set_number(row, col, value))
 
