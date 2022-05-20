@@ -42,10 +42,29 @@ class Board:
         """Calcula os valores do estado interno, para ser usado
         no tabuleiro inicial."""
         self.remaining_cells_count = 0
+        # Counts are stored at (zero_count, one_count) pairs for each row/tuple
+        self.col_counts = ()
+        self.row_counts = ()
         for y in self.cells:
             for x in y:
                 if x == 2:
                     self.remaining_cells_count += 1
+        for col in range(self.size):
+            zero_count, one_count = 0, 0
+            for row in range(self.size):
+                if self.cells[row][col] == 0:
+                    zero_count += 1
+                elif self.cells[row][col] == 1:
+                    one_count += 1
+            self.col_counts += ((zero_count, one_count), )
+        for row in range(self.size):
+            zero_count, one_count = 0, 0
+            for col in range(self.size):
+                if self.cells[row][col] == 0:
+                    zero_count += 1
+                elif self.cells[row][col] == 1:
+                    one_count += 1
+            self.row_counts += ((zero_count, one_count), )
         return self
 
     def get_number(self, row: int, col: int) -> int:
@@ -65,11 +84,22 @@ class Board:
     
     def set_number(self, row: int, col: int, value: int):
         """Devolve um novo Board com o novo valor na posição indicada"""
+        def sum_value_to_count(count_tuple):
+            zeros, ones = count_tuple
+            return ((zeros, ones + 1) if value == 1 else (zeros + 1, ones), )
+
         new_row = self.cells[row][:col] + (value, ) + self.cells[row][col + 1:]
         new_cells = self.cells[:row] + (new_row, ) + self.cells[row + 1:]
         
+        new_col_counts = self.col_counts[:col] + sum_value_to_count(self.col_counts[col]) \
+            + self.col_counts[col + 1:]
+        new_row_counts = self.row_counts[:row] + sum_value_to_count(self.row_counts[row]) \
+            + self.row_counts[row + 1:]
+        
         new_board = Board(new_cells)
         new_board.remaining_cells_count = self.remaining_cells_count - 1
+        new_board.col_counts = new_col_counts
+        new_board.row_counts = new_row_counts
         
         return new_board
 
