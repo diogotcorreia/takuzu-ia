@@ -34,10 +34,11 @@ class TakuzuState:
 
 class Board:
     """Representação interna de um tabuleiro de Takuzu."""
+
     def __init__(self, cells):
         self.cells = cells
         self.size = len(cells)
-    
+
     def calculate_state(self):
         """Calcula os valores do estado interno, para ser usado
         no tabuleiro inicial."""
@@ -62,15 +63,15 @@ class Board:
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
         return (self.get_number(row, col - 1), self.get_number(row, col + 1))
-    
+
     def set_number(self, row: int, col: int, value: int):
         """Devolve um novo Board com o novo valor na posição indicada"""
-        new_row = self.cells[row][:col] + (value, ) + self.cells[row][col + 1:]
-        new_cells = self.cells[:row] + (new_row, ) + self.cells[row + 1:]
-        
+        new_row = self.cells[row][:col] + (value,) + self.cells[row][col + 1 :]
+        new_cells = self.cells[:row] + (new_row,) + self.cells[row + 1 :]
+
         new_board = Board(new_cells)
         new_board.remaining_cells_count = self.remaining_cells_count - 1
-        
+
         return new_board
 
     def get_remaining_cells_count(self):
@@ -94,13 +95,12 @@ class Board:
         board_size = int(input())
         cells = []
         for _ in range(board_size):
-            row = sys.stdin.readline().strip('\n')
-            cells.append(tuple(map(int, row.split('\t'))))
+            row = sys.stdin.readline().strip("\n")
+            cells.append(tuple(map(int, row.split("\t"))))
         return Board(tuple(cells)).calculate_state()
 
 
 class Takuzu(Problem):
-
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
         state = TakuzuState(board)
