@@ -46,10 +46,15 @@ class Board:
         # Counts are stored at (zero_count, one_count) pairs for each row/tuple
         self.col_counts = ()
         self.row_counts = ()
+        # Adjacent mapping indicates which numbers can be placed in each cell
+        # according to the adjacency rule
+        self.adjacent_mapping = ()
+
         for y in self.cells:
             for x in y:
                 if x == 2:
                     self.remaining_cells_count += 1
+
         for col in range(self.size):
             zero_count, one_count = 0, 0
             for row in range(self.size):
@@ -66,7 +71,34 @@ class Board:
                 elif self.cells[row][col] == 1:
                     one_count += 1
             self.row_counts += ((zero_count, one_count),)
+
+        for row in range(self.size):
+            row_mapping = ()
+            for col in range(self.size):
+                row_mapping += (
+                    tuple(filter(lambda x: self.check_adjacent(row, col, x), (0, 1))),
+                )
+            self.adjacent_mapping += (row_mapping,)
         return self
+
+    def check_adjacent(self, row, col, number):
+        """Returns true if the number can be placed in the given position
+        according to the adjacency rule"""
+        invalid_result = (number, number)
+        return (
+            self.adjacent_vertical_numbers(row, col) != invalid_result
+            and self.adjacent_horizontal_numbers(row, col) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (-1, 0)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
+        )
+
+    def apply_adjacent_mapping_changes(self, row, col, number):
+        """Returns new adjacent mapping regarding setting the given position
+        to the given number"""
+        # TODO
+        pass
 
     def get_number(self, row: int, col: int) -> int:
         """Devolve o valor na respetiva posição do tabuleiro."""
@@ -211,6 +243,7 @@ class BoardIterator:
                         number
                         for number in self.possible_cols[self.col]
                         if number in self.possible_rows[self.row]
+                        and number in self.board.adjacent_mapping[self.row][self.col]
                     )
                     if len(intersection) > 0:
                         # found at least a possible value, return it
@@ -273,6 +306,7 @@ if __name__ == "__main__":
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
     board = Board.parse_instance_from_stdin()
+    print(board.adjacent_mapping)
     takuzu = Takuzu(board)
     goal_node = depth_first_tree_search(takuzu)
     print(goal_node.state.board)
