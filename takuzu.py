@@ -34,10 +34,11 @@ class TakuzuState:
 
 class Board:
     """Representação interna de um tabuleiro de Takuzu."""
+
     def __init__(self, cells):
         self.cells = cells
         self.size = len(cells)
-    
+
     def calculate_state(self):
         """Calcula os valores do estado interno, para ser usado
         no tabuleiro inicial."""
@@ -56,7 +57,7 @@ class Board:
                     zero_count += 1
                 elif self.cells[row][col] == 1:
                     one_count += 1
-            self.col_counts += ((zero_count, one_count), )
+            self.col_counts += ((zero_count, one_count),)
         for row in range(self.size):
             zero_count, one_count = 0, 0
             for col in range(self.size):
@@ -64,7 +65,7 @@ class Board:
                     zero_count += 1
                 elif self.cells[row][col] == 1:
                     one_count += 1
-            self.row_counts += ((zero_count, one_count), )
+            self.row_counts += ((zero_count, one_count),)
         return self
 
     def get_number(self, row: int, col: int) -> int:
@@ -81,20 +82,27 @@ class Board:
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
         return (self.get_number(row, col - 1), self.get_number(row, col + 1))
-    
+
     def set_number(self, row: int, col: int, value: int):
         """Devolve um novo Board com o novo valor na posição indicada"""
+
         def sum_value_to_count(count_tuple):
             zeros, ones = count_tuple
-            return ((zeros, ones + 1) if value == 1 else (zeros + 1, ones), )
+            return ((zeros, ones + 1) if value == 1 else (zeros + 1, ones),)
 
-        new_row = self.cells[row][:col] + (value, ) + self.cells[row][col + 1:]
-        new_cells = self.cells[:row] + (new_row, ) + self.cells[row + 1:]
+        new_row = self.cells[row][:col] + (value,) + self.cells[row][col + 1 :]
+        new_cells = self.cells[:row] + (new_row,) + self.cells[row + 1 :]
 
-        new_col_counts = self.col_counts[:col] + sum_value_to_count(self.col_counts[col]) \
-            + self.col_counts[col + 1:]
-        new_row_counts = self.row_counts[:row] + sum_value_to_count(self.row_counts[row]) \
-            + self.row_counts[row + 1:]
+        new_col_counts = (
+            self.col_counts[:col]
+            + sum_value_to_count(self.col_counts[col])
+            + self.col_counts[col + 1 :]
+        )
+        new_row_counts = (
+            self.row_counts[:row]
+            + sum_value_to_count(self.row_counts[row])
+            + self.row_counts[row + 1 :]
+        )
 
         new_board = Board(new_cells)
         new_board.remaining_cells_count = self.remaining_cells_count - 1
@@ -124,14 +132,15 @@ class Board:
         board_size = int(input())
         cells = []
         for _ in range(board_size):
-            row = sys.stdin.readline().strip('\n')
-            cells.append(tuple(map(int, row.split('\t'))))
+            row = sys.stdin.readline().strip("\n")
+            cells.append(tuple(map(int, row.split("\t"))))
         return Board(tuple(cells)).calculate_state()
 
-class BoardIterator():
+
+class BoardIterator:
     def __init__(self, board):
         self.board = board
-    
+
     def can_place_col_row(self, counts):
         """Returns which values can be placed in a column or row"""
         zeros, ones = counts
@@ -139,13 +148,13 @@ class BoardIterator():
         if zeros + ones == self.board.size:
             # column is full
             return ()
-        
+
         # if more zeros than ones, we can only place ones
         if zeros > ones:
-            return (1, )
+            return (1,)
         # if more ones than zeros, we can only place zeros
         if ones > zeros:
-            return (0, )
+            return (0,)
         # otherwise, we can place either
         return (0, 1)
 
@@ -158,10 +167,12 @@ class BoardIterator():
         # FIXME: maybe use iterators instead of tuples
         self.possible_cols = tuple(
             self.can_place_col_row(self.board.col_counts[col])
-                for col in range(self.board.size))
+            for col in range(self.board.size)
+        )
         self.possible_rows = tuple(
             self.can_place_col_row(self.board.row_counts[row])
-                for row in range(self.board.size))
+            for row in range(self.board.size)
+        )
         print(self.possible_cols)
         print(self.possible_rows)
 
@@ -170,11 +181,16 @@ class BoardIterator():
     def __next__(self):
         while self.col < self.board.size:
             while self.row < self.board.size:
-                intersection = tuple(number for number in self.possible_cols[self.col]
-                                if number in self.possible_rows[self.row])
+                intersection = tuple(
+                    number
+                    for number in self.possible_cols[self.col]
+                    if number in self.possible_rows[self.row]
+                )
                 if len(intersection) > 0:
                     # found at least a possible value, return it
-                    self.queue.extend((self.row, self.col, number) for number in intersection)
+                    self.queue.extend(
+                        (self.row, self.col, number) for number in intersection
+                    )
                     self.row += 1
                     return self.queue.pop()
                 self.row += 1
@@ -182,8 +198,8 @@ class BoardIterator():
             self.col += 1
         raise StopIteration()
 
-class Takuzu(Problem):
 
+class Takuzu(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
         state = TakuzuState(board)
