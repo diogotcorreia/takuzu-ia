@@ -70,7 +70,7 @@ class Board:
 
     def get_number(self, row: int, col: int) -> int:
         """Devolve o valor na respetiva posição do tabuleiro."""
-        if 0 <= row <= self.size and 0 <= col <= self.size:
+        if 0 <= row < self.size and 0 <= col < self.size:
             return self.cells[row][col]
 
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
@@ -82,6 +82,19 @@ class Board:
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
         return (self.get_number(row, col - 1), self.get_number(row, col + 1))
+
+    def adjacent_numbers_by_vec(
+        self, row: int, col: int, vec: (int, int)
+    ) -> (int, int):
+        """Returns values determined by adding the vector to the position
+        once and twice"""
+        vec_row, vec_col = vec
+        first_row, first_col = (row + vec_row, col + vec_col)
+        second_row, second_col = (row + vec_row * 2, col + vec_col * 2)
+        return (
+            self.get_number(first_row, first_col),
+            self.get_number(second_row, second_col),
+        )
 
     def set_number(self, row: int, col: int, value: int):
         """Devolve um novo Board com o novo valor na posição indicada"""
@@ -158,6 +171,20 @@ class BoardIterator:
         # otherwise, we can place either
         return (0, 1)
 
+    def check_adjacent(self, row, col, number):
+        """Returns true if the number can be placed in the given position
+        according to the adjacency rule"""
+        invalid_result = (number, number)
+        a = (
+            self.board.adjacent_vertical_numbers(row, col) != invalid_result
+            and self.board.adjacent_horizontal_numbers(row, col) != invalid_result
+            and self.board.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
+            and self.board.adjacent_numbers_by_vec(row, col, (-1, 0)) != invalid_result
+            and self.board.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
+            and self.board.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
+        )
+        return a
+
     def __iter__(self):
         self.col = 0
         self.row = 0
@@ -188,10 +215,17 @@ class BoardIterator:
                     if len(intersection) > 0:
                         # found at least a possible value, return it
                         self.queue.extend(
-                            (self.row, self.col, number) for number in intersection
+                            filter(
+                                lambda x: self.check_adjacent(*x),
+                                (
+                                    (self.row, self.col, number)
+                                    for number in intersection
+                                ),
+                            )
                         )
-                        self.row += 1
-                        return self.queue.pop()
+                        if len(self.queue) > 0:
+                            self.row += 1
+                            return self.queue.pop()
                 self.row += 1
             self.row = 0
             self.col += 1
