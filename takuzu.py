@@ -173,26 +173,25 @@ class BoardIterator:
             self.can_place_col_row(self.board.row_counts[row])
             for row in range(self.board.size)
         )
-        print(self.possible_cols)
-        print(self.possible_rows)
 
         return self
 
     def __next__(self):
         while self.col < self.board.size:
             while self.row < self.board.size:
-                intersection = tuple(
-                    number
-                    for number in self.possible_cols[self.col]
-                    if number in self.possible_rows[self.row]
-                )
-                if len(intersection) > 0:
-                    # found at least a possible value, return it
-                    self.queue.extend(
-                        (self.row, self.col, number) for number in intersection
+                if self.board.cells[self.row][self.col] == 2:
+                    intersection = tuple(
+                        number
+                        for number in self.possible_cols[self.col]
+                        if number in self.possible_rows[self.row]
                     )
-                    self.row += 1
-                    return self.queue.pop()
+                    if len(intersection) > 0:
+                        # found at least a possible value, return it
+                        self.queue.extend(
+                            (self.row, self.col, number) for number in intersection
+                        )
+                        self.row += 1
+                        return self.queue.pop()
                 self.row += 1
             self.row = 0
             self.col += 1
