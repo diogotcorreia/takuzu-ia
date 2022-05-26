@@ -39,8 +39,6 @@ class Board:
     def __init__(self, cells):
         self.cells = cells
         self.size = len(cells)
-        self.complete_rows = set()
-        self.complete_cols = set()
 
     def calculate_state(self):
         """Calcula os valores do estado interno, para ser usado
@@ -49,6 +47,9 @@ class Board:
         # Counts are stored at (zero_count, one_count) pairs for each row/column
         self.col_counts = ()
         self.row_counts = ()
+
+        self.complete_rows = set()
+        self.complete_cols = set()
 
         for col in range(self.size):
             for row in range(self.size):
@@ -140,6 +141,8 @@ class Board:
         new_board.remaining_cells = self.remaining_cells[1:]
         new_board.col_counts = new_col_counts
         new_board.row_counts = new_row_counts
+        new_board.complete_cols = self.complete_cols.copy()
+        new_board.complete_rows = self.complete_rows.copy()
 
         return new_board
 
