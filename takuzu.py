@@ -42,16 +42,37 @@ class Board:
     def calculate_state(self):
         """Calcula os valores do estado interno, para ser usado
         no tabuleiro inicial."""
-        self.remaining_cells_count = 0
-        for y in self.cells:
-            for x in y:
-                if x == 2:
-                    self.remaining_cells_count += 1
+        self.remaining_cells = []
+        # Counts are stored at (zero_count, one_count) pairs for each row/column
+        self.col_counts = ()
+        self.row_counts = ()
+
+        for col in range(self.size):
+            for row in range(self.size):
+                if self.cells[row][col] == 2:
+                    self.remaining_cells.append((row, col))
+
+        for col in range(self.size):
+            zero_count, one_count = 0, 0
+            for row in range(self.size):
+                if self.cells[row][col] == 0:
+                    zero_count += 1
+                elif self.cells[row][col] == 1:
+                    one_count += 1
+            self.col_counts += ((zero_count, one_count),)
+        for row in range(self.size):
+            zero_count, one_count = 0, 0
+            for col in range(self.size):
+                if self.cells[row][col] == 0:
+                    zero_count += 1
+                elif self.cells[row][col] == 1:
+                    one_count += 1
+            self.row_counts += ((zero_count, one_count),)
         return self
 
     def get_number(self, row: int, col: int) -> int:
         """Devolve o valor na respetiva posição do tabuleiro."""
-        if 0 <= row <= self.size and 0 <= col <= self.size:
+        if 0 <= row < self.size and 0 <= col < self.size:
             return self.cells[row][col]
 
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
@@ -64,19 +85,53 @@ class Board:
         respectivamente."""
         return (self.get_number(row, col - 1), self.get_number(row, col + 1))
 
+    def adjacent_numbers_by_vec(
+        self, row: int, col: int, vec: (int, int)
+    ) -> (int, int):
+        """Returns values determined by adding the vector to the position
+        once and twice"""
+        vec_row, vec_col = vec
+        first_row, first_col = (row + vec_row, col + vec_col)
+        second_row, second_col = (row + vec_row * 2, col + vec_col * 2)
+        return (
+            self.get_number(first_row, first_col),
+            self.get_number(second_row, second_col),
+        )
+
     def set_number(self, row: int, col: int, value: int):
         """Devolve um novo Board com o novo valor na posição indicada"""
+
+        def sum_value_to_count(count_tuple):
+            zeros, ones = count_tuple
+            return ((zeros, ones + 1) if value == 1 else (zeros + 1, ones),)
+
         new_row = self.cells[row][:col] + (value,) + self.cells[row][col + 1 :]
         new_cells = self.cells[:row] + (new_row,) + self.cells[row + 1 :]
 
+        new_col_counts = (
+            self.col_counts[:col]
+            + sum_value_to_count(self.col_counts[col])
+            + self.col_counts[col + 1 :]
+        )
+        new_row_counts = (
+            self.row_counts[:row]
+            + sum_value_to_count(self.row_counts[row])
+            + self.row_counts[row + 1 :]
+        )
+
         new_board = Board(new_cells)
-        new_board.remaining_cells_count = self.remaining_cells_count - 1
+        new_board.remaining_cells = self.remaining_cells[1:]
+        new_board.col_counts = new_col_counts
+        new_board.row_counts = new_row_counts
 
         return new_board
 
     def get_remaining_cells_count(self):
         """Devolve o número de posições em branco"""
-        return self.remaining_cells_count
+        return len(self.remaining_cells)
+
+    def get_next_cell(self):
+        return self.remaining_cells[0]
 
     def __repr__(self):
         return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
@@ -100,6 +155,70 @@ class Board:
         return Board(tuple(cells)).calculate_state()
 
 
+class BoardIterator:
+    def __init__(self, board: Board):
+        self.board = board
+
+    def can_place_col_row(self, counts):
+        """Returns which values can be placed in a column or row"""
+        zeros, ones = counts
+
+        if zeros + ones == self.board.size:
+            # column is full
+            return ()
+
+        max_of_type = round(self.board.size / 2)
+
+        # if more zeros than half the size, we can only place ones
+        if zeros >= max_of_type:
+            return (1,)
+        # if more ones than half the size, we can only place zeros
+        if ones >= max_of_type:
+            return (0,)
+        # otherwise, we can place either
+        return (0, 1)
+
+    def can_place_position(self, row, col):
+        """Returns which values can be placed in a position, according
+        to the first rule (count of different values must be the same for
+        every column and role)"""
+
+        possible_cols = self.can_place_col_row(self.board.col_counts[col])
+        possible_rows = self.can_place_col_row(self.board.row_counts[row])
+
+        intersection = tuple(
+            number for number in possible_cols if number in possible_rows
+        )
+
+        return intersection
+
+    def check_adjacent(self, row, col, number):
+        """Returns true if the number can be placed in the given position
+        according to the adjacency rule"""
+        invalid_result = (number, number)
+        return (
+            self.board.adjacent_vertical_numbers(row, col) != invalid_result
+            and self.board.adjacent_horizontal_numbers(row, col) != invalid_result
+            and self.board.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
+            and self.board.adjacent_numbers_by_vec(row, col, (-1, 0)) != invalid_result
+            and self.board.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
+            and self.board.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
+        )
+
+    def __iter__(self):
+        self.row, self.col = self.board.get_next_cell()
+
+        placeable = self.can_place_position(self.row, self.col)
+
+        return map(
+            lambda x: (self.row, self.col, x),
+            filter(lambda x: self.check_adjacent(self.row, self.col, x), placeable),
+        )
+
+    def __next__(self):
+        raise StopIteration()
+
+
 class Takuzu(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
@@ -110,15 +229,13 @@ class Takuzu(Problem):
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        # TODO
-        pass
+        return BoardIterator(state.board)
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
         self.actions(state)."""
-        # TODO
         (row, col, value) = action
         return TakuzuState(state.board.set_number(row, col, value))
 
