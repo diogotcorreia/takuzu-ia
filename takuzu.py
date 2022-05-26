@@ -43,7 +43,7 @@ class Board:
         """Calcula os valores do estado interno, para ser usado
         no tabuleiro inicial."""
         self.remaining_cells = []
-        # Counts are stored at (zero_count, one_count) pairs for each row/tuple
+        # Counts are stored at (zero_count, one_count) pairs for each row/column
         self.col_counts = ()
         self.row_counts = ()
 
