@@ -42,14 +42,16 @@ class Board:
     def calculate_state(self):
         """Calcula os valores do estado interno, para ser usado
         no tabuleiro inicial."""
-        self.remaining_cells_count = 0
-        # Counts are stored at (zero_count, one_count) pairs for each row/tuple
+        self.remaining_cells = []
+        # Counts are stored at (zero_count, one_count) pairs for each row/column
         self.col_counts = ()
         self.row_counts = ()
-        for y in self.cells:
-            for x in y:
-                if x == 2:
-                    self.remaining_cells_count += 1
+
+        for col in range(self.size):
+            for row in range(self.size):
+                if self.cells[row][col] == 2:
+                    self.remaining_cells.append((row, col))
+
         for col in range(self.size):
             zero_count, one_count = 0, 0
             for row in range(self.size):
@@ -118,7 +120,7 @@ class Board:
         )
 
         new_board = Board(new_cells)
-        new_board.remaining_cells_count = self.remaining_cells_count - 1
+        new_board.remaining_cells = self.remaining_cells[1:]
         new_board.col_counts = new_col_counts
         new_board.row_counts = new_row_counts
 
@@ -126,7 +128,10 @@ class Board:
 
     def get_remaining_cells_count(self):
         """Devolve o número de posições em branco"""
-        return self.remaining_cells_count
+        return len(self.remaining_cells)
+
+    def get_next_cell(self):
+        return self.remaining_cells[0]
 
     def __repr__(self):
         return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
@@ -151,7 +156,7 @@ class Board:
 
 
 class BoardIterator:
-    def __init__(self, board):
+    def __init__(self, board: Board):
         self.board = board
 
     def can_place_col_row(self, counts):
@@ -162,20 +167,36 @@ class BoardIterator:
             # column is full
             return ()
 
-        # if more zeros than ones, we can only place ones
-        if zeros > ones:
+        max_of_type = round(self.board.size / 2)
+
+        # if more zeros than half the size, we can only place ones
+        if zeros >= max_of_type:
             return (1,)
-        # if more ones than zeros, we can only place zeros
-        if ones > zeros:
+        # if more ones than half the size, we can only place zeros
+        if ones >= max_of_type:
             return (0,)
         # otherwise, we can place either
         return (0, 1)
+
+    def can_place_position(self, row, col):
+        """Returns which values can be placed in a position, according
+        to the first rule (count of different values must be the same for
+        every column and role)"""
+
+        possible_cols = self.can_place_col_row(self.board.col_counts[col])
+        possible_rows = self.can_place_col_row(self.board.row_counts[row])
+
+        intersection = tuple(
+            number for number in possible_cols if number in possible_rows
+        )
+
+        return intersection
 
     def check_adjacent(self, row, col, number):
         """Returns true if the number can be placed in the given position
         according to the adjacency rule"""
         invalid_result = (number, number)
-        a = (
+        return (
             self.board.adjacent_vertical_numbers(row, col) != invalid_result
             and self.board.adjacent_horizontal_numbers(row, col) != invalid_result
             and self.board.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
@@ -183,52 +204,18 @@ class BoardIterator:
             and self.board.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
             and self.board.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
         )
-        return a
 
     def __iter__(self):
-        self.col = 0
-        self.row = 0
-        # to be used if we calculate more than one value in an interaction
-        self.queue = []
+        self.row, self.col = self.board.get_next_cell()
 
-        # FIXME: maybe use iterators instead of tuples
-        self.possible_cols = tuple(
-            self.can_place_col_row(self.board.col_counts[col])
-            for col in range(self.board.size)
-        )
-        self.possible_rows = tuple(
-            self.can_place_col_row(self.board.row_counts[row])
-            for row in range(self.board.size)
-        )
+        placeable = self.can_place_position(self.row, self.col)
 
-        return self
+        return map(
+            lambda x: (self.row, self.col, x),
+            filter(lambda x: self.check_adjacent(self.row, self.col, x), placeable),
+        )
 
     def __next__(self):
-        while self.col < self.board.size:
-            while self.row < self.board.size:
-                if self.board.cells[self.row][self.col] == 2:
-                    intersection = tuple(
-                        number
-                        for number in self.possible_cols[self.col]
-                        if number in self.possible_rows[self.row]
-                    )
-                    if len(intersection) > 0:
-                        # found at least a possible value, return it
-                        self.queue.extend(
-                            filter(
-                                lambda x: self.check_adjacent(*x),
-                                (
-                                    (self.row, self.col, number)
-                                    for number in intersection
-                                ),
-                            )
-                        )
-                        if len(self.queue) > 0:
-                            self.row += 1
-                            return self.queue.pop()
-                self.row += 1
-            self.row = 0
-            self.col += 1
         raise StopIteration()
 
 
