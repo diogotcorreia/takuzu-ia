@@ -196,7 +196,7 @@ class BoardIterator:
         """Returns true if the number can be placed in the given position
         according to the adjacency rule"""
         invalid_result = (number, number)
-        a = (
+        return (
             self.board.adjacent_vertical_numbers(row, col) != invalid_result
             and self.board.adjacent_horizontal_numbers(row, col) != invalid_result
             and self.board.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
@@ -204,7 +204,6 @@ class BoardIterator:
             and self.board.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
             and self.board.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
         )
-        return a
 
     def __iter__(self):
         self.row, self.col = self.board.get_next_cell()
