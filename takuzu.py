@@ -122,22 +122,26 @@ class Board:
 
         new_row = self.cells[row][:col] + (value,) + self.cells[row][col + 1 :]
         new_cells = self.cells[:row] + (new_row,) + self.cells[row + 1 :]
+        new_board = Board(new_cells)
 
         line_count = sum_value_to_count(self.col_counts[col])
-        check_complete_line(line_count, self.complete_cols, lambda: self.get_col(col))
+        check_complete_line(
+            line_count, self.complete_cols, lambda: new_board.get_col(col)
+        )
 
         new_col_counts = (
             self.col_counts[:col] + (line_count,) + self.col_counts[col + 1 :]
         )
 
         line_count = sum_value_to_count(self.row_counts[row])
-        check_complete_line(line_count, self.complete_rows, lambda: self.get_row(row))
+        check_complete_line(
+            line_count, self.complete_rows, lambda: new_board.get_row(row)
+        )
 
         new_row_counts = (
             self.row_counts[:row] + (line_count,) + self.row_counts[row + 1 :]
         )
 
-        new_board = Board(new_cells)
         new_board.remaining_cells = self.remaining_cells[1:]
         new_board.col_counts = new_col_counts
         new_board.row_counts = new_row_counts
@@ -241,11 +245,11 @@ class BoardIterator:
         return check_complete_line(
             self.board.col_counts[col],
             self.board.complete_cols,
-            lambda: set_number(self.board.get_col(col), col),
+            lambda: set_number(self.board.get_col(col), row),
         ) and check_complete_line(
             self.board.row_counts[row],
             self.board.complete_rows,
-            lambda: set_number(self.board.get_row(row), row),
+            lambda: set_number(self.board.get_row(row), col),
         )
 
     def __iter__(self):
