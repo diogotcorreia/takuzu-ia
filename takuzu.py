@@ -7,6 +7,7 @@
 # 99211 Diogo Torres Correia
 
 import sys
+import numpy as np
 from search import (
     Problem,
     Node,
@@ -167,7 +168,7 @@ class BoardIterator:
             # column is full
             return ()
 
-        max_of_type = round(self.board.size / 2)
+        max_of_type = np.ceil(self.board.size / 2)
 
         # if more zeros than half the size, we can only place ones
         if zeros >= max_of_type:
