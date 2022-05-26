@@ -64,6 +64,8 @@ class Board:
                 elif self.cells[row][col] == 1:
                     one_count += 1
             self.col_counts += ((zero_count, one_count),)
+            if zero_count + one_count == self.size:
+                self.complete_cols.add(self.get_col(col))
         for row in range(self.size):
             zero_count, one_count = 0, 0
             for col in range(self.size):
@@ -72,6 +74,9 @@ class Board:
                 elif self.cells[row][col] == 1:
                     one_count += 1
             self.row_counts += ((zero_count, one_count),)
+            if zero_count + one_count == self.size:
+                self.complete_rows.add(self.get_row(row))
+
         return self
 
     def get_number(self, row: int, col: int) -> int:
