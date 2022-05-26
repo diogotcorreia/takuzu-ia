@@ -112,7 +112,7 @@ class Board:
 
         def sum_value_to_count(count_tuple):
             zeros, ones = count_tuple
-            return ((zeros, ones + 1) if value == 1 else (zeros + 1, ones),)
+            return (zeros, ones + 1) if value == 1 else (zeros + 1, ones)
 
         def check_complete_line(count_tuple, completed_set, get_line):
             zeros, ones = count_tuple
@@ -125,12 +125,16 @@ class Board:
         line_count = sum_value_to_count(self.col_counts[col])
         check_complete_line(line_count, self.complete_cols, lambda: self.get_col(col))
 
-        new_col_counts = self.col_counts[:col] + line_count + self.col_counts[col + 1 :]
+        new_col_counts = (
+            self.col_counts[:col] + (line_count,) + self.col_counts[col + 1 :]
+        )
 
         line_count = sum_value_to_count(self.row_counts[row])
         check_complete_line(line_count, self.complete_rows, lambda: self.get_row(row))
 
-        new_row_counts = self.row_counts[:row] + line_count + self.row_counts[row + 1 :]
+        new_row_counts = (
+            self.row_counts[:row] + (line_count,) + self.row_counts[row + 1 :]
+        )
 
         new_board = Board(new_cells)
         new_board.remaining_cells = self.remaining_cells[1:]
@@ -224,7 +228,7 @@ class BoardIterator:
 
         def check_complete_line(count_tuple, completed_set, get_line):
             zeros, ones = count_tuple
-            if zeros + ones + 1 == self.size:
+            if zeros + ones + 1 == self.board.size:
                 return get_line() not in completed_set
             return True
 
@@ -233,11 +237,11 @@ class BoardIterator:
 
         return check_complete_line(
             self.board.col_counts[col],
-            self.complete_cols,
+            self.board.complete_cols,
             lambda: set_number(self.board.get_col(col), col),
         ) and check_complete_line(
             self.board.row_counts[row],
-            self.complete_rows,
+            self.board.complete_rows,
             lambda: set_number(self.board.get_row(row), row),
         )
 
