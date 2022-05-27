@@ -183,20 +183,15 @@ class Board:
             cells.append(tuple(map(int, row.split("\t"))))
         return Board(tuple(cells)).calculate_state()
 
-
-class BoardIterator:
-    def __init__(self, board: Board):
-        self.board = board
-
     def can_place_col_row(self, counts):
         """Returns which values can be placed in a column or row"""
         zeros, ones = counts
 
-        if zeros + ones == self.board.size:
+        if zeros + ones == self.size:
             # column is full
             return ()
 
-        max_of_type = np.ceil(self.board.size / 2)
+        max_of_type = np.ceil(self.size / 2)
 
         # if more zeros than half the size, we can only place ones
         if zeros >= max_of_type:
@@ -212,8 +207,8 @@ class BoardIterator:
         to the first rule (count of different values must be the same for
         every column and role)"""
 
-        possible_cols = self.can_place_col_row(self.board.col_counts[col])
-        possible_rows = self.can_place_col_row(self.board.row_counts[row])
+        possible_cols = self.can_place_col_row(self.col_counts[col])
+        possible_rows = self.can_place_col_row(self.row_counts[row])
 
         intersection = tuple(
             number for number in possible_cols if number in possible_rows
@@ -226,12 +221,12 @@ class BoardIterator:
         according to the adjacency rule"""
         invalid_result = (number, number)
         return (
-            self.board.adjacent_vertical_numbers(row, col) != invalid_result
-            and self.board.adjacent_horizontal_numbers(row, col) != invalid_result
-            and self.board.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
-            and self.board.adjacent_numbers_by_vec(row, col, (-1, 0)) != invalid_result
-            and self.board.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
-            and self.board.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
+            self.adjacent_vertical_numbers(row, col) != invalid_result
+            and self.adjacent_horizontal_numbers(row, col) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (-1, 0)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
         )
 
     def check_duplicate_col_row(self, row, col, number):
@@ -240,7 +235,7 @@ class BoardIterator:
 
         def check_complete_line(count_tuple, completed_set, get_line):
             zeros, ones = count_tuple
-            if zeros + ones + 1 == self.board.size:
+            if zeros + ones + 1 == self.size:
                 return get_line() not in completed_set
             return True
 
@@ -248,31 +243,23 @@ class BoardIterator:
             return line[:index] + (number,) + line[index + 1 :]
 
         return check_complete_line(
-            self.board.col_counts[col],
-            self.board.complete_cols,
-            lambda: set_number(self.board.get_col(col), row),
+            self.col_counts[col],
+            self.complete_cols,
+            lambda: set_number(self.get_col(col), row),
         ) and check_complete_line(
-            self.board.row_counts[row],
-            self.board.complete_rows,
-            lambda: set_number(self.board.get_row(row), col),
+            self.row_counts[row],
+            self.complete_rows,
+            lambda: set_number(self.get_row(row), col),
         )
 
-    def __iter__(self):
-        self.row, self.col = self.board.get_next_cell()
+    def actions_for_cell(self, row, col):
+        placeable = self.can_place_position(row, col)
 
-        placeable = self.can_place_position(self.row, self.col)
-
-        return map(
-            lambda x: (self.row, self.col, x),
-            filter(
-                lambda x: self.check_adjacent(self.row, self.col, x)
-                and self.check_duplicate_col_row(self.row, self.col, x),
-                placeable,
-            ),
+        return filter(
+            lambda x: self.check_adjacent(row, col, x)
+            and self.check_duplicate_col_row(row, col, x),
+            placeable,
         )
-
-    def __next__(self):
-        raise StopIteration()
 
 
 class Takuzu(Problem):
@@ -285,7 +272,11 @@ class Takuzu(Problem):
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        return BoardIterator(state.board)
+        row, col = state.board.get_next_cell()
+
+        return map(
+            lambda number: (row, col, number), state.board.actions_for_cell(row, col)
+        )
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
