@@ -51,10 +51,8 @@ class Board:
         self.complete_rows = set()
         self.complete_cols = set()
 
-        for col in range(self.size):
-            for row in range(self.size):
-                if self.cells[row][col] == 2:
-                    self.remaining_cells.append((row, col))
+        # Store which numbers can be placed for each cell
+        self.possible_values = ()
 
         for col in range(self.size):
             zero_count, one_count = 0, 0
@@ -76,6 +74,23 @@ class Board:
             self.row_counts += ((zero_count, one_count),)
             if zero_count + one_count == self.size:
                 self.complete_rows.add(self.get_row(row))
+
+        for row in range(self.size):
+            row_possibilities = ()
+            for col in range(self.size):
+                if self.cells[row][col] != 2:
+                    row_possibilities += ((),)
+                    continue
+                possibilities = tuple(self.actions_for_cell(row, col))
+                row_possibilities += (possibilities,)
+                if len(possibilities) == 2:
+                    self.remaining_cells.append((row, col))
+                else:
+                    # Insert cells with only one possibility at the front
+                    # of the list, so they're placed first, reducing the
+                    # branching factor
+                    self.remaining_cells.insert(0, (row, col))
+            self.possible_values += (row_possibilities,)
 
         return self
 
@@ -152,8 +167,39 @@ class Board:
         new_board.row_counts = new_row_counts
         new_board.complete_cols = self.complete_cols.copy()
         new_board.complete_rows = self.complete_rows.copy()
+        new_board.possible_values = self.possible_values
+        new_board.calculate_next_possible_values(row, col)
 
         return new_board
+
+    def calculate_next_possible_values(self, row: int, col: int):
+        """Recebe a posição que foi alterada, de forma a atualizar os valores
+        possíveis para as posições afetadas"""
+        # has_filled_col = sum(self.col_counts[col]) == self.size
+        # has_filled_row = sum(self.row_counts[row]) == self.size
+
+        # Recalculate for affected row and column
+        new_possible_values = ()
+        for r in range(self.size):
+            row_possibilities = ()
+            for c in range(self.size):
+                old_possibilities = self.get_possibilities_for_cell(r, c)
+                if (r != row and c != col) or len(old_possibilities) == 0:
+                    row_possibilities += (old_possibilities,)
+                    continue
+
+                possibilities = tuple(self.actions_for_cell(r, c))
+
+                if len(old_possibilities) == 2 and len(possibilities) < 2:
+                    if not (r == row and c == col):
+                        self.remaining_cells.remove((r, c))
+                        self.remaining_cells.insert(0, (r, c))
+
+                row_possibilities += (possibilities,)
+
+            new_possible_values += (row_possibilities,)
+
+        self.possible_values = new_possible_values
 
     def get_remaining_cells_count(self):
         """Devolve o número de posições em branco"""
@@ -161,6 +207,9 @@ class Board:
 
     def get_next_cell(self):
         return self.remaining_cells[0]
+
+    def get_possibilities_for_cell(self, row, col):
+        return self.possible_values[row][col]
 
     def __repr__(self):
         return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
@@ -183,20 +232,15 @@ class Board:
             cells.append(tuple(map(int, row.split("\t"))))
         return Board(tuple(cells)).calculate_state()
 
-
-class BoardIterator:
-    def __init__(self, board: Board):
-        self.board = board
-
     def can_place_col_row(self, counts):
         """Returns which values can be placed in a column or row"""
         zeros, ones = counts
 
-        if zeros + ones == self.board.size:
+        if zeros + ones == self.size:
             # column is full
             return ()
 
-        max_of_type = np.ceil(self.board.size / 2)
+        max_of_type = np.ceil(self.size / 2)
 
         # if more zeros than half the size, we can only place ones
         if zeros >= max_of_type:
@@ -212,8 +256,8 @@ class BoardIterator:
         to the first rule (count of different values must be the same for
         every column and role)"""
 
-        possible_cols = self.can_place_col_row(self.board.col_counts[col])
-        possible_rows = self.can_place_col_row(self.board.row_counts[row])
+        possible_cols = self.can_place_col_row(self.col_counts[col])
+        possible_rows = self.can_place_col_row(self.row_counts[row])
 
         intersection = tuple(
             number for number in possible_cols if number in possible_rows
@@ -226,12 +270,12 @@ class BoardIterator:
         according to the adjacency rule"""
         invalid_result = (number, number)
         return (
-            self.board.adjacent_vertical_numbers(row, col) != invalid_result
-            and self.board.adjacent_horizontal_numbers(row, col) != invalid_result
-            and self.board.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
-            and self.board.adjacent_numbers_by_vec(row, col, (-1, 0)) != invalid_result
-            and self.board.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
-            and self.board.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
+            self.adjacent_vertical_numbers(row, col) != invalid_result
+            and self.adjacent_horizontal_numbers(row, col) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (1, 0)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (-1, 0)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (0, 1)) != invalid_result
+            and self.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
         )
 
     def check_duplicate_col_row(self, row, col, number):
@@ -240,7 +284,7 @@ class BoardIterator:
 
         def check_complete_line(count_tuple, completed_set, get_line):
             zeros, ones = count_tuple
-            if zeros + ones + 1 == self.board.size:
+            if zeros + ones + 1 == self.size:
                 return get_line() not in completed_set
             return True
 
@@ -248,31 +292,26 @@ class BoardIterator:
             return line[:index] + (number,) + line[index + 1 :]
 
         return check_complete_line(
-            self.board.col_counts[col],
-            self.board.complete_cols,
-            lambda: set_number(self.board.get_col(col), row),
+            self.col_counts[col],
+            self.complete_cols,
+            lambda: set_number(self.get_col(col), row),
         ) and check_complete_line(
-            self.board.row_counts[row],
-            self.board.complete_rows,
-            lambda: set_number(self.board.get_row(row), col),
+            self.row_counts[row],
+            self.complete_rows,
+            lambda: set_number(self.get_row(row), col),
         )
 
-    def __iter__(self):
-        self.row, self.col = self.board.get_next_cell()
+    def actions_for_cell(self, row, col):
+        if self.cells[row][col] != 2:
+            return ()
 
-        placeable = self.can_place_position(self.row, self.col)
+        placeable = self.can_place_position(row, col)
 
-        return map(
-            lambda x: (self.row, self.col, x),
-            filter(
-                lambda x: self.check_adjacent(self.row, self.col, x)
-                and self.check_duplicate_col_row(self.row, self.col, x),
-                placeable,
-            ),
+        return filter(
+            lambda x: self.check_adjacent(row, col, x)
+            and self.check_duplicate_col_row(row, col, x),
+            placeable,
         )
-
-    def __next__(self):
-        raise StopIteration()
 
 
 class Takuzu(Problem):
@@ -285,7 +324,10 @@ class Takuzu(Problem):
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        return BoardIterator(state.board)
+        row, col = state.board.get_next_cell()
+
+        possibilities = state.board.get_possibilities_for_cell(row, col)
+        return map(lambda number: (row, col, number), possibilities)
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
