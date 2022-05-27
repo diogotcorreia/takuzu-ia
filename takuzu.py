@@ -48,6 +48,9 @@ class Board:
         self.col_counts = ()
         self.row_counts = ()
 
+        self.complete_rows = set()
+        self.complete_cols = set()
+
         for col in range(self.size):
             for row in range(self.size):
                 if self.cells[row][col] == 2:
@@ -61,6 +64,8 @@ class Board:
                 elif self.cells[row][col] == 1:
                     one_count += 1
             self.col_counts += ((zero_count, one_count),)
+            if zero_count + one_count == self.size:
+                self.complete_cols.add(self.get_col(col))
         for row in range(self.size):
             zero_count, one_count = 0, 0
             for col in range(self.size):
@@ -69,12 +74,21 @@ class Board:
                 elif self.cells[row][col] == 1:
                     one_count += 1
             self.row_counts += ((zero_count, one_count),)
+            if zero_count + one_count == self.size:
+                self.complete_rows.add(self.get_row(row))
+
         return self
 
     def get_number(self, row: int, col: int) -> int:
         """Devolve o valor na respetiva posição do tabuleiro."""
         if 0 <= row < self.size and 0 <= col < self.size:
             return self.cells[row][col]
+
+    def get_row(self, row: int):
+        return self.cells[row]
+
+    def get_col(self, col: int):
+        return tuple(self.cells[row][col] for row in range(self.size))
 
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
         """Devolve os valores imediatamente abaixo e acima,
@@ -104,26 +118,40 @@ class Board:
 
         def sum_value_to_count(count_tuple):
             zeros, ones = count_tuple
-            return ((zeros, ones + 1) if value == 1 else (zeros + 1, ones),)
+            return (zeros, ones + 1) if value == 1 else (zeros + 1, ones)
+
+        def check_complete_line(count_tuple, completed_set, get_line):
+            zeros, ones = count_tuple
+            if zeros + ones == self.size:
+                completed_set.add(get_line())
 
         new_row = self.cells[row][:col] + (value,) + self.cells[row][col + 1 :]
         new_cells = self.cells[:row] + (new_row,) + self.cells[row + 1 :]
+        new_board = Board(new_cells)
+
+        line_count = sum_value_to_count(self.col_counts[col])
+        check_complete_line(
+            line_count, self.complete_cols, lambda: new_board.get_col(col)
+        )
 
         new_col_counts = (
-            self.col_counts[:col]
-            + sum_value_to_count(self.col_counts[col])
-            + self.col_counts[col + 1 :]
-        )
-        new_row_counts = (
-            self.row_counts[:row]
-            + sum_value_to_count(self.row_counts[row])
-            + self.row_counts[row + 1 :]
+            self.col_counts[:col] + (line_count,) + self.col_counts[col + 1 :]
         )
 
-        new_board = Board(new_cells)
+        line_count = sum_value_to_count(self.row_counts[row])
+        check_complete_line(
+            line_count, self.complete_rows, lambda: new_board.get_row(row)
+        )
+
+        new_row_counts = (
+            self.row_counts[:row] + (line_count,) + self.row_counts[row + 1 :]
+        )
+
         new_board.remaining_cells = self.remaining_cells[1:]
         new_board.col_counts = new_col_counts
         new_board.row_counts = new_row_counts
+        new_board.complete_cols = self.complete_cols.copy()
+        new_board.complete_rows = self.complete_rows.copy()
 
         return new_board
 
@@ -206,6 +234,29 @@ class BoardIterator:
             and self.board.adjacent_numbers_by_vec(row, col, (0, -1)) != invalid_result
         )
 
+    def check_duplicate_col_row(self, row, col, number):
+        """Returns true if the number can be placed in the given position
+        according to the duplicate rule"""
+
+        def check_complete_line(count_tuple, completed_set, get_line):
+            zeros, ones = count_tuple
+            if zeros + ones + 1 == self.board.size:
+                return get_line() not in completed_set
+            return True
+
+        def set_number(line, index):
+            return line[:index] + (number,) + line[index + 1 :]
+
+        return check_complete_line(
+            self.board.col_counts[col],
+            self.board.complete_cols,
+            lambda: set_number(self.board.get_col(col), row),
+        ) and check_complete_line(
+            self.board.row_counts[row],
+            self.board.complete_rows,
+            lambda: set_number(self.board.get_row(row), col),
+        )
+
     def __iter__(self):
         self.row, self.col = self.board.get_next_cell()
 
@@ -213,7 +264,11 @@ class BoardIterator:
 
         return map(
             lambda x: (self.row, self.col, x),
-            filter(lambda x: self.check_adjacent(self.row, self.col, x), placeable),
+            filter(
+                lambda x: self.check_adjacent(self.row, self.col, x)
+                and self.check_duplicate_col_row(self.row, self.col, x),
+                placeable,
+            ),
         )
 
     def __next__(self):
