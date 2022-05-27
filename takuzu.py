@@ -51,10 +51,8 @@ class Board:
         self.complete_rows = set()
         self.complete_cols = set()
 
-        for col in range(self.size):
-            for row in range(self.size):
-                if self.cells[row][col] == 2:
-                    self.remaining_cells.append((row, col))
+        # Store which numbers can be placed for each cell
+        self.possible_values = ()
 
         for col in range(self.size):
             zero_count, one_count = 0, 0
@@ -76,6 +74,23 @@ class Board:
             self.row_counts += ((zero_count, one_count),)
             if zero_count + one_count == self.size:
                 self.complete_rows.add(self.get_row(row))
+
+        for row in range(self.size):
+            row_possibilities = ()
+            for col in range(self.size):
+                if self.cells[row][col] != 2:
+                    row_possibilities += ((),)
+                    continue
+                possibilities = tuple(self.actions_for_cell(row, col))
+                row_possibilities += (possibilities,)
+                if len(possibilities) == 2:
+                    self.remaining_cells.append((row, col))
+                else:
+                    # Insert cells with only one possibility at the front
+                    # of the list, so they're placed first, reducing the
+                    # branching factor
+                    self.remaining_cells.insert(0, (row, col))
+            self.possible_values += (row_possibilities,)
 
         return self
 
@@ -152,8 +167,39 @@ class Board:
         new_board.row_counts = new_row_counts
         new_board.complete_cols = self.complete_cols.copy()
         new_board.complete_rows = self.complete_rows.copy()
+        new_board.possible_values = self.possible_values
+        new_board.calculate_next_possible_values(row, col)
 
         return new_board
+
+    def calculate_next_possible_values(self, row: int, col: int):
+        """Recebe a posição que foi alterada, de forma a atualizar os valores
+        possíveis para as posições afetadas"""
+        # has_filled_col = sum(self.col_counts[col]) == self.size
+        # has_filled_row = sum(self.row_counts[row]) == self.size
+
+        # Recalculate for affected row and column
+        new_possible_values = ()
+        for r in range(self.size):
+            row_possibilities = ()
+            for c in range(self.size):
+                old_possibilities = self.get_possibilities_for_cell(r, c)
+                if (r != row and c != col) or len(old_possibilities) == 0:
+                    row_possibilities += (old_possibilities,)
+                    continue
+
+                possibilities = tuple(self.actions_for_cell(r, c))
+
+                if len(old_possibilities) == 2 and len(possibilities) < 2:
+                    if not (r == row and c == col):
+                        self.remaining_cells.remove((r, c))
+                        self.remaining_cells.insert(0, (r, c))
+
+                row_possibilities += (possibilities,)
+
+            new_possible_values += (row_possibilities,)
+
+        self.possible_values = new_possible_values
 
     def get_remaining_cells_count(self):
         """Devolve o número de posições em branco"""
@@ -161,6 +207,9 @@ class Board:
 
     def get_next_cell(self):
         return self.remaining_cells[0]
+
+    def get_possibilities_for_cell(self, row, col):
+        return self.possible_values[row][col]
 
     def __repr__(self):
         return "\n".join(map(lambda x: "\t".join(map(str, x)), self.cells))
@@ -253,6 +302,9 @@ class Board:
         )
 
     def actions_for_cell(self, row, col):
+        if self.cells[row][col] != 2:
+            return ()
+
         placeable = self.can_place_position(row, col)
 
         return filter(
@@ -274,9 +326,8 @@ class Takuzu(Problem):
         partir do estado passado como argumento."""
         row, col = state.board.get_next_cell()
 
-        return map(
-            lambda number: (row, col, number), state.board.actions_for_cell(row, col)
-        )
+        possibilities = state.board.get_possibilities_for_cell(row, col)
+        return map(lambda number: (row, col, number), possibilities)
 
     def result(self, state: TakuzuState, action):
         """Retorna o estado resultante de executar a 'action' sobre
