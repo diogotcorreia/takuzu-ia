@@ -16,7 +16,6 @@ from search import (
     depth_first_tree_search,
     greedy_search,
     recursive_best_first_search,
-    compare_searchers,
 )
 
 
@@ -367,9 +366,5 @@ if __name__ == "__main__":
     board = Board.parse_instance_from_stdin()
     takuzu = Takuzu(board)
     goal_node = depth_first_tree_search(takuzu)
-    #goal_node = greedy_search(takuzu)
-    #goal_node = astar_search(takuzu)
     print(goal_node.state.board)
-    #compare_searchers([takuzu], ["Algo", "Results"] , searchers=(depth_first_tree_search, breadth_first_tree_search, astar_search, greedy_search, recursive_best_first_search))
-    #compare_searchers([takuzu], ["Algo", "Results"] , searchers=(depth_first_tree_search, greedy_search))
     pass
