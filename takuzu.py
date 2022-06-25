@@ -30,8 +30,6 @@ class TakuzuState:
     def __lt__(self, other):
         return self.id < other.id
 
-    # TODO: outros metodos da classe
-
 
 class Board:
     """Representação interna de um tabuleiro de Takuzu."""
@@ -345,7 +343,6 @@ class Takuzu(Problem):
 
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
-        # TODO
         board = node.state.board
         c = 0
         for pos in board.remaining_cells:
@@ -354,11 +351,8 @@ class Takuzu(Problem):
                 c += 1
         return c
 
-    # TODO: outros metodos da classe
-
 
 if __name__ == "__main__":
-    # TODO:
     # Ler o ficheiro do standard input,
     # Usar uma técnica de procura para resolver a instância,
     # Retirar a solução a partir do nó resultante,
