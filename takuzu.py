@@ -16,6 +16,7 @@ from search import (
     depth_first_tree_search,
     greedy_search,
     recursive_best_first_search,
+    compare_searchers,
 )
 
 
@@ -346,7 +347,13 @@ class Takuzu(Problem):
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
         # TODO
-        pass
+        board = node.state.board
+        c = 0
+        for pos in board.remaining_cells:
+            possibilities = board.get_possibilities_for_cell(*pos)
+            if len(possibilities) == 2:
+                c += 1
+        return c
 
     # TODO: outros metodos da classe
 
@@ -360,5 +367,9 @@ if __name__ == "__main__":
     board = Board.parse_instance_from_stdin()
     takuzu = Takuzu(board)
     goal_node = depth_first_tree_search(takuzu)
+    #goal_node = greedy_search(takuzu)
+    #goal_node = astar_search(takuzu)
     print(goal_node.state.board)
+    #compare_searchers([takuzu], ["Algo", "Results"] , searchers=(depth_first_tree_search, breadth_first_tree_search, astar_search, greedy_search, recursive_best_first_search))
+    #compare_searchers([takuzu], ["Algo", "Results"] , searchers=(depth_first_tree_search, greedy_search))
     pass
