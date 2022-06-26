@@ -9,6 +9,9 @@
 \usepackage{hyperref}
 \usepackage{tikz}
 \usepackage{subcaption}
+\usepackage{adjustbox}
+\usepackage{siunitx}
+\usepackage{booktabs}
 
 \graphicspath{ {./} }
 \hypersetup{
@@ -82,22 +85,21 @@ Por exemplo, as ações possíveis para o tabuleiro abaixo são
 \]
 
 Posto isto, é fácil observar que ainda pode ser feita uma \textbf{otimização} à escolha da
-posição sobre a qual se vai efetuar uma ação num dado estado - posições com apenas
-uma ação possível são escolhidas primeiro - o que leva a um fator de ramificação entre 1 e 2,
+posição sobre a qual se vai efetuar uma ação num dado estado -
+\textbf{posições com apenas uma ação possível são escolhidas primeiro} -
+o que leva a um fator de ramificação entre 1 e 2,
 mais próximo do 1, um \textit{pruning} bastante bom.
 
 Dado nenhuma ação quebrar as regras, o \textbf{teste objetivo} consiste apenas em determinar
 se o tabuleiro se encontra totalmente preenchido. Caso isto aconteça, sabemos que
 nos encontramos perante uma solução válida. Isto permite uma verificação de tempo constante, \(O(1)\).
 
-\section{Avaliação Experimental}
-
 Atendendo ao problema, uma abordagem simples para a verificação da qualidade de
 um estado é contar o número de posições livres com dois valores possíveis
 (o número de escolhas que terão que ser feitas).
 Temos portanto que um estado A é melhor que um estado B quando
 \(\text{posicoes\_livres\_2valor\_A} < \text{posicoes\_livres\_2valor\_B}\).
-A função heurística utilizada foi, então
+A função heurística utilizada foi, para os algoritmos de procura informada, então
 
 \[
   \begin{aligned}
@@ -111,13 +113,36 @@ A função heurística utilizada foi, então
   \end{aligned}
 \]
 
+\section{Avaliação Experimental}
+
 Os critérios utilizados para comparar os algoritmos de procura foram o \textbf{tempo de execução},
 os \textbf{nós gerados} e os \textbf{nós expandidos}.
 Os resultados podem ser observados na tabela e figuras seguintes.
 
+\begin{adjustbox}{width={\textwidth}, totalheight={\textheight}, keepaspectratio}
+  \begin{tabular}{ll cccc cccc cccc}
+    \toprule
+    \multicolumn{2}{l}{Input} & \multicolumn{4}{c}{Tempo de Execução (s)} & \multicolumn{4}{c}{Nós Gerados} & \multicolumn{4}{c}{Nós Expandidos}                                                       \\
+    \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-10} \cmidrule(lr){11-14}
+    N                         & d                                         & BFS                             & DFS                                & A* & GS & BFS & DFS & A* & GS & BFS & DFS & A* & GS \\
+    \midrule
+    4                         & 11                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    4                         & 12                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    6                         & 27                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    6                         & 30                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    8                         & 49                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    8                         & 53                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    10                        & 78                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    10                        & 81                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    12                        & 114                                       & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    12                        & 116                                       & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    \bottomrule
+  \end{tabular}
+\end{adjustbox} \\
+
 % TODO Gráficos pipis
 
-\section{Análise de Resultados}
+\subsection{Análise de Resultados}
 
 % TODO
 
