@@ -322,6 +322,9 @@ class Takuzu(Problem):
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
+        if len(state.board.remaining_cells) == 0:
+            return []
+
         row, col = state.board.get_next_cell()
 
         possibilities = state.board.get_possibilities_for_cell(row, col)
@@ -359,6 +362,7 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
     board = Board.parse_instance_from_stdin()
     takuzu = Takuzu(board)
-    goal_node = depth_first_tree_search(takuzu)
+    # goal_node = depth_first_tree_search(takuzu)
+    goal_node = greedy_search(takuzu)
     print(goal_node.state.board)
     pass
