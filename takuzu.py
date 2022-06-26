@@ -28,6 +28,14 @@ class TakuzuState:
         TakuzuState.state_id += 1
 
     def __lt__(self, other):
+        depth_diff = (
+            self.board.get_remaining_cells_count()
+            - other.board.get_remaining_cells_count()
+        )
+
+        if depth_diff != 0:
+            return depth_diff < 0
+
         return self.id < other.id
 
 
@@ -322,7 +330,7 @@ class Takuzu(Problem):
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        if len(state.board.remaining_cells) == 0:
+        if state.board.get_remaining_cells_count() == 0:
             return []
 
         row, col = state.board.get_next_cell()
