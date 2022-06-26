@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage[legalpaper, portrait, margin=3cm]{geometry}
+\usepackage[legalpaper, portrait, margin=2cm]{geometry}
 \usepackage{fancyhdr}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -34,10 +34,111 @@
 
 \renewcommand{\labelitemii}{$\circ$}
 \renewcommand{\labelitemiii}{$\diamond$}
+\newcommand{\op}{\operatorname}
 
 \begin{document}
-  \section{First Section}
+\section{Descrição e Modelação do Problema}
 
-  TODO
+Foi proposto o desenvolvimento de um programa em Python com o objetivo de resolver o
+problema \textit{Takuzu} utilizando técnicas de procura de IA.
+O presente relatório apresenta uma solução para o problema.
+
+Este jogo lógico decorre sobre um tabuleiro com uma grelha quadrada onde cada célula
+pode conter os números 0 ou 1.
+O objetivo é, dado um tabuleiro com uma grelha \(N \times N\) preenchida parcialmente e
+sem alterar o conteúdo destas posições, preencher totalmente a grelha com 0s e 1s de maneira
+a que a diferença entre 0s e 1s em cada linha e coluna seja zero para Ns pares e um para Ns ímpares,
+não haja mais do que dois números iguais em linha (tanto horizontal como verticalmente),
+todas as linhas sejam diferentes entre si e todas as colunas sejam diferentes entre si.
+
+A solução formaliza o \textit{Takuzu} como um problema de procura.
+Cada \textbf{estado} do tabuleiro é representado por uma matriz \(N \times N\) sendo que o estado inicial
+é a representação matricial do tabuleiro lido do \textit{standard input}.
+Para efeitos práticos, as posições livres são representadas com o número 2.
+Uma \textbf{ação} é representada pelo tuplo \texttt{(x, y, value)}, e consiste em colocar um 0 ou um 1 (\texttt{value})
+numa posição livre do tabuleiro \texttt{(x, y)}. O \textbf{resultado} de uma dada ação consiste na
+atribuição do valor \texttt{value} à posição \texttt{(x, y)} a uma cópia do estado do nó pai.
+
+\section{Estratégia de Solução}
+
+Ao modelar uma solução para o problema, rapidamente se verificou a importância de reduzir
+o \textbf{fator de ramificação} da árvore de procura, diminuindo o custo de memória,
+e evitando a criação de estados repetidos, o que desperdiça tempo de computação.
+
+Logo, para cada estado apenas é considerada uma das posições livres, o que significa
+que os sucessores desse estado são os que resultam da colocação de um valor nessa posição.
+Adicionalmente, as ações consideradas para uma dada posição consistem apenas naquelas que
+\textbf{não quebram nenhuma das regras} mencionadas no ponto anterior.
+Por exemplo, as ações possíveis para o tabuleiro abaixo são
+\texttt{(1, 0, 1)}, \texttt{(1, 3, 0)}, \texttt{(1, 3, 1)} e \texttt{(2, 3, 1)}.
+
+\[
+  \begin{array}{cccc}
+    0 & 1 & 1 & 0 \\
+    2 & 0 & 0 & 2 \\
+    0 & 0 & 1 & 2 \\
+    1 & 1 & 0 & 0
+  \end{array}
+\]
+
+Posto isto, é fácil observar que ainda pode ser feita uma \textbf{otimização} à escolha da
+posição sobre a qual se vai efetuar uma ação num dado estado - posições com apenas
+uma ação possível são escolhidas primeiro - o que leva a um fator de ramificação entre 1 e 2,
+mais próximo do 1, um \textit{pruning} bastante bom.
+
+Dado nenhuma ação quebrar as regras, o \textbf{teste objetivo} consiste apenas em determinar
+se o tabuleiro se encontra totalmente preenchido. Caso isto aconteça, sabemos que
+nos encontramos perante uma solução válida. Isto permite uma verificação de tempo constante, \(O(1)\).
+
+\section{Avaliação Experimental}
+
+Atendendo ao problema, uma abordagem simples para a verificação da qualidade de
+um estado é contar o número de posições livres com dois valores possíveis
+(o número de escolhas que terão que ser feitas).
+Temos portanto que um estado A é melhor que um estado B quando
+\(\text{posicoes\_livres\_2valor\_A} < \text{posicoes\_livres\_2valor\_B}\).
+A função heurística utilizada foi, então
+
+\[
+  \begin{aligned}
+    \op{cell}(\op{row}, \op{col}) = \begin{cases}
+                                      1      & \text{se}~\#\op{possible\_values}(\op{row}, \op{col}) = 2 \\
+                                      0      & \text{se}~\#\op{possible\_values}(\op{row}, \op{col}) = 1 \\
+                                      \infty & \text{se}~\#\op{possible\_values}(\op{row}, \op{col}) = 0
+                                    \end{cases}
+     & , &
+    h(\op{state}) = \sum_{\substack{0\leq \op{row} < N \\0\leq \op{col} < N}} \op{cell}_{\op{state}}(\op{row}, \op{col})
+  \end{aligned}
+\]
+
+Os critérios utilizados para comparar os algoritmos de procura foram o \textbf{tempo de execução},
+os \textbf{nós gerados} e os \textbf{nós expandidos}.
+Os resultados podem ser observados na tabela e figuras seguintes.
+
+% TODO Gráficos pipis
+
+\section{Análise de Resultados}
+
+% TODO
+
+\section{Conclusões}
+
+As quatro procuras são \textbf{completas}, dado que em cada ação se preenche uma posição do tabuleiro,
+o que impede a entrada em loops.
+Adicionalmente, a \textbf{otimalidade}, que corresponde a descobrir a solução de menor custo,
+não é relevante para este problema pois todas as soluções possíveis se encontram à mesma profundidade.
+Além disso, estamos a considerar apenas tabuleiros com uma única solução,
+pelo que a solução, quando encontrada, será sempre a mesma.
+O custo ótimo do problema (\(C*\)) é sempre igual ao número inicial de posições livres.
+Isto significa que a escolha da procura apenas influencia a rapidez com que se resolve o problema.
+É importante fazer notar que a diferença entre as procuras cegas e as informadas
+apenas é percetível quando a posição livre escolhida para efetuar uma ação tem duas ações possíveis.
+Nos casos em que apenas há uma ação possível o comportamento é idêntico para ambas, como é de esperar.
+Considerando a admissibilidade e consistência da heurística, é observável que
+% TODO FIXME below
+\colorbox{red}{cenas, não me apetece pensar se esta porcaria é admissível}.
+Concluindo, com base na análise efetuada, foi escolhida a \textbf{procura gananciosa}, já que
+% TODO FIXME below
+\colorbox{red}{cenas}
 
 \end{document}
