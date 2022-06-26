@@ -101,13 +101,13 @@ A função heurística utilizada foi, então
 
 \[
   \begin{aligned}
-    \op{cell}(\op{row}, \op{col}) = \begin{cases}
-                                      1      & \text{se}~\#\op{possible\_values}(\op{row}, \op{col}) = 2 \\
-                                      0      & \text{se}~\#\op{possible\_values}(\op{row}, \op{col}) = 1 \\
-                                      \infty & \text{se}~\#\op{possible\_values}(\op{row}, \op{col}) = 0
-                                    \end{cases}
+    \op{cell}(x, y) = \begin{cases}
+                        1      & \text{if}~\#\op{possible\_values}(x, y) = 2 \\
+                        0      & \text{if}~\#\op{possible\_values}(x, y) = 1 \\
+                        \infty & \text{if}~\#\op{possible\_values}(x, y) = 0
+                      \end{cases}
      & , &
-    h(\op{state}) = \sum_{\substack{0\leq \op{row} < N \\0\leq \op{col} < N}} \op{cell}_{\op{state}}(\op{row}, \op{col})
+    h(\op{state}) = \sum^{N-1}_{x=0}\sum^{N-1}_{y=0} \op{cell}_{\op{state}}(x, y)
   \end{aligned}
 \]
 
