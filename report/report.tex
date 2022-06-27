@@ -121,27 +121,45 @@ menos espaços por preencher, devem ter prioridade face aos mais acima.
 
 \section{Avaliação Experimental}
 
+Para testar os vários algoritmos de procura, geraram-se vários tabuleiros que satisfaziam a restição do enunciado, isto é,
+que só têm uma solução possível. Ao contrário dos tabuleiros fornecidos pelo corpo docente, estes tabuleiros são muito
+esparsos, pelo que vão haver muitas possibilidades para cada célula, aumentando o fator de ramificação
+(ficará mais próximo de 2).
+
 Os critérios utilizados para comparar os algoritmos de procura foram o \textbf{tempo de execução},
 os \textbf{nós gerados} e os \textbf{nós expandidos}.
+Para a medição do tempo de execução, foi utilizada a ferramenta \href{https://github.com/sharkdp/hyperfine}{\textit{hyperfine}}.
 Os resultados podem ser observados na tabela e figuras seguintes.
 
 \begin{adjustbox}{width={\textwidth}, totalheight={\textheight}, keepaspectratio}
   \begin{tabular}{ll cccc cccc cccc}
     \toprule
-    \multicolumn{2}{l}{Input} & \multicolumn{4}{c}{Tempo de Execução (s)} & \multicolumn{4}{c}{Nós Gerados} & \multicolumn{4}{c}{Nós Expandidos}                                                       \\
+    \multicolumn{2}{l}{Input} & \multicolumn{4}{c}{Tempo de Execução (s)} & \multicolumn{4}{c}{Nós Gerados} & \multicolumn{4}{c}{Nós Expandidos}                                                                                   \\
     \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-10} \cmidrule(lr){11-14}
-    N                         & d                                         & BFS                             & DFS                                & A* & GS & BFS & DFS & A* & GS & BFS & DFS & A* & GS \\
+    N                         & d                                         & GS                              & DFS                                & A*     & BFS    & GS    & DFS   & A*    & BFS   & GS    & DFS   & A*    & BFS   \\
     \midrule
-    4                         & 11                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    4                         & 12                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    6                         & 27                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    6                         & 30                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    8                         & 49                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    8                         & 53                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    10                        & 78                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    10                        & 81                                        & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    12                        & 114                                       & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
-    12                        & 116                                       & ?                               & ?                                  & ?  & ?  & ?   & ?   & ?  & ?  & ?   & ?   & ?  & ?  \\
+    % size04_09.in
+    4                         & 11                                        & 0.1126                          & 0.1167                             & 0.1129 & 0.1191 & 11    & 11    & 11    & 11    & 11    & 11    & 11    & 11    \\
+    % size04_22.in
+    4                         & 12                                        & 0.1170                          & 0.1191                             & 0.1200 & 0.1237 & 12    & 12    & 12    & 12    & 12    & 12    & 12    & 12    \\
+    % size06_18.in
+    6                         & 27                                        & 0.1170                          & 0.1175                             & 0.1184 & 0.1159 & 27    & 27    & 27    & 27    & 27    & 27    & 27    & 27    \\
+    % size06_38.in
+    6                         & 30                                        & 0.1166                          & 0.1212                             & 0.1161 & 0.1273 & 33    & 35    & 33    & 35    & 31    & 35    & 31    & 35    \\
+    % size08_49.in
+    8                         & 49                                        & 0.1248                          & 0.1301                             & 0.1374 & 0.1309 & 112   & 115   & 132   & 137   & 99    & 112   & 117   & 137   \\
+    % size08_18.in
+    8                         & 53                                        & 0.1226                          & 0.1719                             & 0.1298 & 0.1936 & 69    & 601   & 87    & 740   & 58    & 597   & 75    & 740   \\
+    % size10_34.in
+    10                        & 78                                        & 0.1308                          & 0.1708                             & 0.1390 & 0.1832 & 112   & 426   & 117   & 450   & 96    & 420   & 101   & 450   \\
+    % size10_42.in
+    10                        & 81                                        & 0.1299                          & 1.965                              & 0.1505 & 2.604  & 103   & 14531 & 135   & 17244 & 88    & 14525 & 117   & 17244 \\
+    % size12_04.in
+    12                        & 114                                       & 1.290                           & 1.572                              & 1.817  & 2.004  & 4364  & 9582  & 5718  & 11590 & 3786  & 9572  & 4955  & 11590 \\
+    % size12_02.in
+    12                        & 116                                       & 12.355                          & 6.506                              & 20.706 & 10.178 & 21403 & 51572 & 28066 & 63173 & 18607 & 51563 & 24355 & 63173 \\
+    % t13.in
+    31                        & 180                                       & 0.1932                          & 0.1914                             & 0.1939 & 0.1836 & 180   & 180   & 180   & 180   & 180   & 180   & 180   & 180   \\
     \bottomrule
   \end{tabular}
 \end{adjustbox} \\
