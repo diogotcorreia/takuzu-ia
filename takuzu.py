@@ -45,6 +45,7 @@ class Board:
     def __init__(self, cells):
         self.cells = cells
         self.size = len(cells)
+        self.invalid = False
 
     def calculate_state(self):
         """Calcula os valores do estado interno, para ser usado
@@ -91,6 +92,11 @@ class Board:
                 row_possibilities += (possibilities,)
                 if len(possibilities) == 2:
                     self.remaining_cells.append((row, col))
+                elif len(possibilities) == 0:
+                    # If it's impossible to complete a board,
+                    # abort immediately to save computing costs
+                    self.invalid = True
+                    return self
                 else:
                     # Insert cells with only one possibility at the front
                     # of the list, so they're placed first, reducing the
@@ -195,6 +201,10 @@ class Board:
                     continue
 
                 possibilities = tuple(self.actions_for_cell(r, c))
+
+                if (r != row or c != col) and len(possibilities) == 0:
+                    self.invalid = True
+                    return
 
                 if len(old_possibilities) == 2 and len(possibilities) < 2:
                     if not (r == row and c == col):
@@ -330,7 +340,7 @@ class Takuzu(Problem):
     def actions(self, state: TakuzuState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        if state.board.get_remaining_cells_count() == 0:
+        if state.board.invalid or state.board.get_remaining_cells_count() == 0:
             return []
 
         row, col = state.board.get_next_cell()
@@ -360,8 +370,6 @@ class Takuzu(Problem):
             possibilities = board.get_possibilities_for_cell(*pos)
             if len(possibilities) == 2:
                 c += 1
-            elif len(possibilities) == 0:
-                return np.inf
         return c
 
 
