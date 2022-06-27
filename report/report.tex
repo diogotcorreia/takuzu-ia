@@ -72,7 +72,7 @@ Logo, para cada estado apenas é considerada uma das posições livres, o que si
 que os sucessores desse estado são os que resultam da colocação de um valor nessa posição.
 Adicionalmente, as ações consideradas para uma dada posição consistem apenas naquelas que
 \textbf{não quebram nenhuma das regras} mencionadas no ponto anterior.
-Por exemplo, as ações possíveis para o tabuleiro abaixo são
+Por exemplo, as ações possíveis para o tabuleiro abaixo são, considerando todas as posições livres,
 \texttt{(1, 0, 1)}, \texttt{(1, 3, 1)} e \texttt{(2, 3, 1)}.
 
 \[
@@ -99,7 +99,8 @@ um estado é contar o número de posições livres com dois valores possíveis
 (o número de escolhas que terão que ser feitas).
 Temos portanto que um estado A é melhor que um estado B quando
 \(\text{posicoes\_livres\_2valor\_A} < \text{posicoes\_livres\_2valor\_B}\).
-A função heurística utilizada foi, para os algoritmos de procura informada, então
+Considerando \(C_{\op{empty}}\) como o conjunto de posições vazias, a
+\textbf{função heurística} utilizada foi, para os algoritmos de procura informada, então
 
 \[
   \begin{aligned}
@@ -109,9 +110,14 @@ A função heurística utilizada foi, para os algoritmos de procura informada, e
                         \infty & \text{if}~\#\op{possible\_values}(x, y) = 0
                       \end{cases}
      & , &
-    h(\op{state}) = \sum^{N-1}_{x=0}\sum^{N-1}_{y=0} \op{cell}_{\op{state}}(x, y)
+    h(\op{state}) = \sum_{x,y\in C_{\op{empty}}} \op{cell}_{\op{state}}(x, y)
   \end{aligned}
 \]
+
+Além da heurística, foi implementada uma função de desempate mais complexa através de
+modificações ao método \texttt{\_\_lt\_\_(self, other)} da classe \texttt{TakuzuState}, como sugerido no enunciado.
+Considerou-se que os estados que se encontram mais abaixo na árvore, isto é, aqueles com
+menos espaços por preencher, devem ter prioridade face aos mais acima.
 
 \section{Avaliação Experimental}
 
