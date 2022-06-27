@@ -166,11 +166,14 @@ Os resultados podem ser observados na tabela seguinte.
   \end{tabular}
 \end{adjustbox} \\
 
-% TODO Gráficos pipis
-
 \subsection{Análise de Resultados}
 
-% TODO
+É importante fazer notar que a diferença entre as procuras cegas e as informadas
+apenas é percetível quando a posição livre escolhida para efetuar uma ação tem duas ações possíveis.
+Nos casos em que apenas há uma ação possível o comportamento é idêntico para ambas, como é de esperar.
+Isto é observável no tabuleiro de tamanho \(31 \times 31\), cuja árvore de procura tem fator de ramificação 1 -
+podemos dizer que tem apenas 1 ramo. Neste caso, a DFS chega-se à frente pois as procuras informadas perdem
+tempo de computação com o cálculo da heurística.
 
 \section{Conclusões}
 
@@ -183,16 +186,15 @@ Além disso, estamos a considerar apenas tabuleiros com uma única solução,
 pelo que a solução, quando encontrada, será sempre a mesma.
 O custo ótimo do problema (\(C*\)) é sempre igual ao número inicial de posições livres.
 Isto significa que a escolha da procura apenas influencia a rapidez com que se resolve o problema.
-É importante fazer notar que a diferença entre as procuras cegas e as informadas
-apenas é percetível quando a posição livre escolhida para efetuar uma ação tem duas ações possíveis.
-Nos casos em que apenas há uma ação possível o comportamento é idêntico para ambas, como é de esperar.
+Adicionalmente, como mencionado anteriormente, a diferença entre procuras cegas e informadas apenas é perceptível quando
+há 2 ramos por onde escolher.
 Considerando a admissibilidade e consistência da heurística, é observável que
 a heurística é admissível, visto que corresponde ao número de posições com duas ações possíveis, que
 irá ser sempre menor ou igual que o número total de posições por preencher (\(h^*(n)\)).
 A consistência da heurística não é relevante neste problema, visto que se trata de uma árvore sem estados repetidos e não
 de um grafo.
-Concluindo, com base na análise efetuada, foi escolhida a \textbf{procura gananciosa}, já que,
-embora por vezes seja mais lenta que uma DFS em casos específicos, é mais rápida no geral dado
-que expande significativamente menos nós que todas as outras procuras.
+Concluindo, com base na análise efetuada, foi escolhida a \textbf{procura gananciosa}, já que
+apresenta uma melhoria evidente face à DFS em tabuleiros esparsos, com muitas casas vazias, e se
+encontra ao nível desta procura para os restantes.
 
 \end{document}
