@@ -98,9 +98,10 @@ Atendendo ao problema, uma abordagem simples para a verificação da qualidade d
 um estado é contar o número de posições livres com dois valores possíveis
 (o número de escolhas que terão que ser feitas).
 Temos portanto que um estado A é melhor que um estado B quando
-\(\text{posicoes\_livres\_2valor\_A} < \text{posicoes\_livres\_2valor\_B}\).
+o número de posições livres com 2 valores possíveis no estado A é menor que
+o número de posições livres com 2 valores possíveis no estado B.
 Considerando \(C_{\op{empty}}\) como o conjunto de posições vazias, a
-\textbf{função heurística} utilizada foi, para os algoritmos de procura informada, então
+\textbf{função heurística} utilizada para os algoritmos de procura informada foi, então
 
 \[
   \begin{aligned}
@@ -123,8 +124,8 @@ menos posições por preencher, devem ter prioridade face aos mais acima.
 Para testar os vários algoritmos de procura, geraram-se vários tabuleiros de tamanho \(N \times N\)
 e \(d\) posições vazias que satisfazem a restrição do enunciado, isto é, que só têm uma solução possível.
 Ao contrário dos tabuleiros fornecidos pelo corpo docente, estes tabuleiros são muito
-esparsos, ou seja, têm uma grande densidade de posições vazias, pelo que vão haver muitas
-possibilidades para cada posição, aumentando o fator de ramificação (ficará mais próximo de 2).
+esparsos, ou seja, têm uma grande densidade de posições vazias, pelo que existem muitas
+posições com 2 valores possíveis, aumentando o fator de ramificação (ficará mais próximo de 2).
 
 Os critérios utilizados para comparar os algoritmos de procura foram o \textbf{tempo de execução},
 os \textbf{nós gerados} e os \textbf{nós expandidos}.
@@ -185,16 +186,18 @@ não é relevante para este problema pois todas as soluções possíveis se enco
 Além disso, estamos a considerar apenas tabuleiros com uma única solução,
 pelo que a solução, quando encontrada, será sempre a mesma.
 O custo ótimo do problema (\(C*\)) é sempre igual ao número inicial de posições livres.
-Isto significa que a escolha da procura apenas influencia a rapidez com que se resolve o problema.
+Isto significa que a escolha da procura apenas influencia a rapidez com que se resolve o problema e o uso de memória.
 Adicionalmente, como mencionado anteriormente, a diferença entre procuras cegas e informadas apenas é perceptível quando
 há 2 ramos por onde escolher.
-Considerando a admissibilidade e consistência da heurística, é observável que
+Considerando a \textbf{admissibilidade} e \textbf{consistência} da heurística, é observável que
 a heurística é admissível, visto que corresponde ao número de posições com duas ações possíveis, que
 irá ser sempre menor ou igual que o número total de posições por preencher (\(h^*(n)\)).
 A consistência da heurística não é relevante neste problema, visto que se trata de uma árvore sem estados repetidos e não
 de um grafo.
-Concluindo, com base na análise efetuada, foi escolhida a \textbf{procura gananciosa}, já que
-apresenta uma melhoria evidente face à DFS em tabuleiros esparsos, com muitas casas vazias, e se
-encontra ao nível desta procura para os restantes.
+Concluindo, com base na análise efetuada, é fácil identificar a superioridade das procuras informadas dadas as
+condições certas face às procuras cegas. Foi então escolhida a \textbf{procura gananciosa}, já que,
+apesar de perder tempo de computação a calcular a heurística para tabuleiros pequenos e/ou menos esparsos,
+é evidente a vantagem face às outras procuras em tabuleiros maiores, especialmente nos mais
+esparsos.
 
 \end{document}
