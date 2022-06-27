@@ -105,9 +105,8 @@ Considerando \(C_{\op{empty}}\) como o conjunto de posições vazias, a
 \[
   \begin{aligned}
     \op{cell}(x, y) = \begin{cases}
-                        1      & \text{if}~\#\op{possible\_values}(x, y) = 2 \\
-                        0      & \text{if}~\#\op{possible\_values}(x, y) = 1 \\
-                        \infty & \text{if}~\#\op{possible\_values}(x, y) = 0
+                        1 & \text{if}~\#\op{possible\_values}(x, y) = 2 \\
+                        0 & \text{c.c.}
                       \end{cases}
      & , &
     h(\op{state}) = \sum_{x,y\in C_{\op{empty}}} \op{cell}_{\op{state}}(x, y)
