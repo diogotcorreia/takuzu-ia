@@ -50,6 +50,7 @@ class Board:
     def calculate_state(self):
         """Calcula os valores do estado interno, para ser usado
         no tabuleiro inicial."""
+        self.count_pos_with_two_actions = 0
         self.remaining_cells = []
         # Counts are stored at (zero_count, one_count) pairs for each row/column
         self.col_counts = ()
@@ -91,6 +92,7 @@ class Board:
                 possibilities = tuple(self.actions_for_cell(row, col))
                 row_possibilities += (possibilities,)
                 if len(possibilities) == 2:
+                    self.count_pos_with_two_actions += 1
                     self.remaining_cells.append((row, col))
                 elif len(possibilities) == 0:
                     # If it's impossible to complete a board,
@@ -180,6 +182,7 @@ class Board:
         new_board.complete_cols = self.complete_cols.copy()
         new_board.complete_rows = self.complete_rows.copy()
         new_board.possible_values = self.possible_values
+        new_board.count_pos_with_two_actions = self.count_pos_with_two_actions
         new_board.calculate_next_possible_values(row, col)
 
         return new_board
@@ -207,6 +210,7 @@ class Board:
                     return
 
                 if len(old_possibilities) == 2 and len(possibilities) < 2:
+                    self.count_pos_with_two_actions -= 1
                     if not (r == row and c == col):
                         self.remaining_cells.remove((r, c))
                         self.remaining_cells.insert(0, (r, c))
@@ -365,12 +369,7 @@ class Takuzu(Problem):
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
         board = node.state.board
-        c = 0
-        for pos in board.remaining_cells:
-            possibilities = board.get_possibilities_for_cell(*pos)
-            if len(possibilities) == 2:
-                c += 1
-        return c
+        return board.count_pos_with_two_actions
 
 
 if __name__ == "__main__":
