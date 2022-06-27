@@ -8,10 +8,11 @@
 \usepackage{blindtext}
 \usepackage{hyperref}
 \usepackage{tikz}
-\usepackage{subcaption}
 \usepackage{adjustbox}
 \usepackage{siunitx}
 \usepackage{booktabs}
+\usepackage{svg}
+\usepackage{subfig}
 
 \graphicspath{ {./} }
 \hypersetup{
@@ -129,10 +130,9 @@ posições com 2 valores possíveis, aumentando o fator de ramificação (ficar�
 
 Os critérios utilizados para comparar os algoritmos de procura foram o \textbf{tempo de execução},
 os \textbf{nós gerados} e os \textbf{nós expandidos}.
-Para a medição do tempo de execução, foi utilizada a ferramenta \href{https://github.com/sharkdp/hyperfine}{\textit{hyperfine}}.
+Para a medição do tempo de execução, foi utilizada a ferramenta \href{https://github.com/sharkdp/hyperfine}{\textit{hyperfine}},
+que efetua pelo menos 5 execuções de cada teste.
 Os resultados podem ser observados na tabela seguinte.
-
-\vspace{0.5cm}
 
 \begin{adjustbox}{width={\textwidth}, totalheight={\textheight}, keepaspectratio}
   \begin{tabular}{ll cccc cccc cccc}
@@ -199,5 +199,23 @@ condições certas face às procuras cegas. Foi então escolhida a \textbf{procu
 apesar de perder tempo de computação a calcular a heurística para tabuleiros pequenos e/ou menos esparsos,
 é evidente a vantagem face às outras procuras em tabuleiros maiores, especialmente nos mais
 esparsos.
+
+\clearpage
+
+\section*{Anexo}
+
+\begin{figure}[h]%
+  \centering
+  \includesvg[scale=0.7]{time}
+  \caption{Tempo de Execução (segundos), por Input - Escala Logarítmica}
+\end{figure}
+
+\begin{figure}[h]%
+  \centering
+  \subfloat[\centering Nós Gerados]{{\includesvg[scale=0.55]{generated}}}%
+  \qquad
+  \subfloat[\centering Nós Expandidos]{{\includesvg[scale=0.55]{expanded}}}%
+  \caption{Número de Nós Gerados e Expandidos, por Input - Escala Logarítmica}%
+\end{figure}
 
 \end{document}

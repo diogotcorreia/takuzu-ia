@@ -141,3 +141,4 @@ report/*.bcf
 report/*.blg
 report/*.xml
 report/*.out
+report/svg-inkscape
