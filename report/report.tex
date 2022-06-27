@@ -117,14 +117,15 @@ Considerando \(C_{\op{empty}}\) como o conjunto de posições vazias, a
 Além da heurística, foi implementada uma função de desempate mais complexa através de
 modificações ao método \texttt{\_\_lt\_\_(self, other)} da classe \texttt{TakuzuState}, como sugerido no enunciado.
 Considerou-se que os estados que se encontram mais abaixo na árvore, isto é, aqueles com
-menos espaços por preencher, devem ter prioridade face aos mais acima.
+menos posições por preencher, devem ter prioridade face aos mais acima.
 
 \section{Avaliação Experimental}
 
-Para testar os vários algoritmos de procura, geraram-se vários tabuleiros que satisfaziam a restição do enunciado, isto é,
-que só têm uma solução possível. Ao contrário dos tabuleiros fornecidos pelo corpo docente, estes tabuleiros são muito
-esparsos, pelo que vão haver muitas possibilidades para cada célula, aumentando o fator de ramificação
-(ficará mais próximo de 2).
+Para testar os vários algoritmos de procura, geraram-se vários tabuleiros de tamanho \(N \times N\)
+e \(d\) posições vazias que satisfazem a restrição do enunciado, isto é, que só têm uma solução possível.
+Ao contrário dos tabuleiros fornecidos pelo corpo docente, estes tabuleiros são muito
+esparsos, ou seja, têm uma grande densidade de posições vazias, pelo que vão haver muitas
+possibilidades para cada posição, aumentando o fator de ramificação (ficará mais próximo de 2).
 
 Os critérios utilizados para comparar os algoritmos de procura foram o \textbf{tempo de execução},
 os \textbf{nós gerados} e os \textbf{nós expandidos}.
@@ -175,7 +176,8 @@ Os resultados podem ser observados na tabela e figuras seguintes.
 As quatro procuras são \textbf{completas}, dado que em cada ação se preenche uma posição do tabuleiro,
 o que impede a entrada em loops.
 Adicionalmente, a \textbf{otimalidade}, que corresponde a descobrir a solução de menor custo,
-não é relevante para este problema pois todas as soluções possíveis se encontram à mesma profundidade.
+não é relevante para este problema pois todas as soluções possíveis se encontram à mesma profundidade
+(que é igual ao número de posições vazias do tabuleiro).
 Além disso, estamos a considerar apenas tabuleiros com uma única solução,
 pelo que a solução, quando encontrada, será sempre a mesma.
 O custo ótimo do problema (\(C*\)) é sempre igual ao número inicial de posições livres.
@@ -184,10 +186,12 @@ Isto significa que a escolha da procura apenas influencia a rapidez com que se r
 apenas é percetível quando a posição livre escolhida para efetuar uma ação tem duas ações possíveis.
 Nos casos em que apenas há uma ação possível o comportamento é idêntico para ambas, como é de esperar.
 Considerando a admissibilidade e consistência da heurística, é observável que
-% TODO FIXME below
-\colorbox{red}{cenas, não me apetece pensar se esta porcaria é admissível}.
-Concluindo, com base na análise efetuada, foi escolhida a \textbf{procura gananciosa}, já que
-% TODO FIXME below
-\colorbox{red}{cenas}
+a heurística é admissível, visto que corresponde ao número de posições com duas ações possíveis, que
+irá ser sempre menor ou igual que o número total de posições por preencher (\(h^*(n)\)).
+A consistência da heurística não é relevante neste problema, visto que se trata de uma árvore sem estados repetidos e não
+de um grafo.
+Concluindo, com base na análise efetuada, foi escolhida a \textbf{procura gananciosa}, já que,
+embora por vezes seja mais lenta que uma DFS em casos específicos, é mais rápida no geral dado
+que expande significativamente menos nós que todas as outras procuras.
 
 \end{document}
