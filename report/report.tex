@@ -65,12 +65,14 @@ atribuição do valor \texttt{value} à posição \texttt{(x, y)} a uma cópia d
 
 \section{Estratégia de Solução}
 
-Ao modelar uma solução para o problema, rapidamente se verificou a importância de reduzir
+Ao modelar uma solução para o problema em questão, que se tomou como um \textbf{Problema de Satisfação de Restrições (CSP)},
+rapidamente se verificou a importância de reduzir
 o \textbf{fator de ramificação} da árvore de procura, diminuindo o custo de memória,
 e evitando a criação de estados repetidos, o que desperdiça tempo de computação.
 
-Logo, para cada estado apenas é considerada uma das posições livres, o que significa
-que os sucessores desse estado são os que resultam da colocação de um valor nessa posição.
+Logo, para cada estado apenas é considerada uma das variáveis (posições livres), o que significa
+que os sucessores desse estado são os que resultam da atribuição de um valor do domínio a essa variável.
+Assim sendo, casa estado pode ter, no máximo, dois sucessores.
 Adicionalmente, as ações consideradas para uma dada posição consistem apenas naquelas que
 \textbf{não quebram nenhuma das regras} mencionadas no ponto anterior.
 Por exemplo, as ações possíveis para o tabuleiro abaixo são
@@ -86,14 +88,23 @@ Por exemplo, as ações possíveis para o tabuleiro abaixo são
 \]
 
 Posto isto, é fácil observar que ainda pode ser feita uma \textbf{otimização} à escolha da
-posição sobre a qual se vai efetuar uma ação num dado estado -
-\textbf{posições com apenas uma ação possível são escolhidas primeiro} -
-o que leva a um fator de ramificação entre 1 e 2,
-mais próximo do 1, um \textit{pruning} bastante bom.
+posição sobre a qual se vai efetuar uma ação num dado estado:
+\textbf{posições com apenas uma ação possível são escolhidas primeiro},
+ou seja, considerou-se a Heurística dos Valores Remanescentes Mínimos (MRV) para
+a escolha da posição.
+Todas estas otimizações levam a um fator de ramificação entre 1 e 2,
+geralmente mais próximo do 1, um \textit{pruning} bastante bom.
+Isto significa que para uma DFS normal, obtemos uma complexidade temporal \(O(N^2)\).
 
 Dado nenhuma ação quebrar as regras, o \textbf{teste objetivo} consiste apenas em determinar
 se o tabuleiro se encontra totalmente preenchido. Caso isto aconteça, sabemos que
 nos encontramos perante uma solução válida. Isto permite uma verificação de tempo constante, \(O(1)\).
+
+Com todas estas observações em mente, escolheu-se utilizar \textit{forward checking} para combinar
+a inferência com os algoritmos de procura. Após efetuar uma ação, tornamos as variáveis
+adjacentes (isto é, adjacentes na árvore de restrições) consistentes em arco com a variável alterada.
+Se o domínio de alguma destas variáveis ficar vazio, escolhemos outro valor para esta variável ou
+fazemos \textit{backtracking}.
 
 Atendendo ao problema, uma abordagem simples para a verificação da qualidade de
 um estado é contar o número de posições livres com dois valores possíveis
@@ -122,17 +133,18 @@ menos posições por preencher, devem ter prioridade face aos mais acima.
 
 \section{Avaliação Experimental}
 
-Para testar os vários algoritmos de procura, geraram-se vários tabuleiros de tamanho \(N \times N\)
+Para testar os vários algoritmos de procura,
+\href{https://gist.github.com/D-Card/68d32c6371abfce61dc5bbaabd633f27}{geraram-se vários tabuleiros} de tamanho \(N \times N\)
 e \(d\) posições vazias que satisfazem a restrição do enunciado, isto é, que só têm uma solução possível.
 Ao contrário dos tabuleiros fornecidos pelo corpo docente, estes tabuleiros são muito
 esparsos, ou seja, têm uma grande densidade de posições vazias, pelo que existem muitas
-posições com 2 valores possíveis, aumentando o fator de ramificação (ficará mais próximo de 2).
+posições com 2 valores possíveis, aumentando o fator de ramificação.
 
 Os critérios utilizados para comparar os algoritmos de procura foram o \textbf{tempo de execução},
 os \textbf{nós gerados} e os \textbf{nós expandidos}.
 Para a medição do tempo de execução, foi utilizada a ferramenta \href{https://github.com/sharkdp/hyperfine}{\textit{hyperfine}},
 que efetua pelo menos 5 execuções de cada teste.
-Os resultados podem ser observados na tabela seguinte.
+Os resultados podem ser observados na tabela seguinte e nos gráficos em anexo.
 
 \begin{adjustbox}{width={\textwidth}, totalheight={\textheight}, keepaspectratio}
   \begin{tabular}{ll cccc cccc cccc}
@@ -172,13 +184,24 @@ Os resultados podem ser observados na tabela seguinte.
 É importante fazer notar que a diferença entre as procuras cegas e as informadas
 apenas é percetível quando a posição livre escolhida para efetuar uma ação tem duas ações possíveis.
 Nos casos em que apenas há uma ação possível o comportamento é idêntico para ambas, como é de esperar.
-Isto é observável no tabuleiro de tamanho \(31 \times 31\), cuja árvore de procura tem fator de ramificação 1 -
+Isto é particularmente observável no tabuleiro de tamanho \(31 \times 31\), cuja árvore de procura tem fator de ramificação 1 -
 podemos dizer que tem apenas 1 ramo. Neste caso, a DFS chega-se à frente pois as procuras informadas perdem
 tempo de computação com o cálculo da heurística.
+O mesmo acontece nos tabuleiros mais pequenos, onde o fator de ramificação é 1:
+as procuras são equiparáveis, visto que só há um caminho por onde seguir.
+
+Podemos observar também o contrário: no caso do tabuleiro de tamanho \(12 \times 12\), com \(116\) posições
+livres, vamos ter uma árvore de procura significamente maior do que para o caso analisado anteriormente,
+em que o fator de ramificação será maior que 1 (para a \textit{greedy search} neste tabuleiro, o
+fator de ramificação será aproximadamente \(1.0898\)).
+Neste caso, as procuras informadas têm um desempenho melhor, devido à heurística escolhida.
+Assim, a \textbf{procura mais eficiente é a \textit{Greedy Search}}, seguida da A*.
+De seguida, temos a DFS e por último, como seria de esperar visto que a solução encontra-se
+à profundidade máxima da árvore, a BFS.
 
 \section{Conclusões}
 
-As quatro procuras são \textbf{completas}, dado que em cada ação se preenche uma posição do tabuleiro,
+As quatro procuras são \textbf{completas}, dado que em cada ação se preenche uma única posição do tabuleiro,
 o que impede a entrada em loops.
 Adicionalmente, a \textbf{otimalidade}, que corresponde a descobrir a solução de menor custo,
 não é relevante para este problema pois todas as soluções possíveis se encontram à mesma profundidade
