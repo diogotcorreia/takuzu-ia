@@ -13,6 +13,7 @@
 \usepackage{booktabs}
 \usepackage{svg}
 \usepackage{subfig}
+\usepackage{caption}
 
 \graphicspath{ {./} }
 \hypersetup{
@@ -144,40 +145,7 @@ Os critérios utilizados para comparar os algoritmos de procura foram o \textbf{
 os \textbf{nós gerados} e os \textbf{nós expandidos}.
 Para a medição do tempo de execução, foi utilizada a ferramenta \href{https://github.com/sharkdp/hyperfine}{\textit{hyperfine}},
 que efetua pelo menos 5 execuções de cada teste.
-Os resultados podem ser observados na tabela seguinte e nos gráficos em anexo.
-
-\begin{adjustbox}{width={\textwidth}, totalheight={\textheight}, keepaspectratio}
-  \begin{tabular}{ll cccc cccc cccc}
-    \toprule
-    \multicolumn{2}{l}{Input} & \multicolumn{4}{c}{Tempo de Execução (s)} & \multicolumn{4}{c}{Nós Gerados} & \multicolumn{4}{c}{Nós Expandidos}                                                                                   \\
-    \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-10} \cmidrule(lr){11-14}
-    N                         & d                                         & GS                              & A*                                 & DFS    & BFS    & GS    & A*    & DFS   & BFS   & GS    & A*    & DFS   & BFS   \\
-    \midrule
-    % size04_09.in
-    4                         & 11                                        & 0.1152                          & 0.1126                             & 0.1127 & 0.1125 & 11    & 11    & 11    & 11    & 11    & 11    & 11    & 11    \\
-    % size04_22.in
-    4                         & 12                                        & 0.1174                          & 0.1188                             & 0.1161 & 0.1166 & 12    & 12    & 12    & 12    & 12    & 12    & 12    & 12    \\
-    % size06_18.in
-    6                         & 27                                        & 0.1168                          & 0.1323                             & 0.1169 & 0.1194 & 27    & 27    & 27    & 27    & 27    & 27    & 27    & 27    \\
-    % size06_38.in
-    6                         & 30                                        & 0.1207                          & 0.1213                             & 0.1160 & 0.1172 & 33    & 33    & 33    & 33    & 32    & 32    & 33    & 33    \\
-    % size08_49.in
-    8                         & 49                                        & 0.1270                          & 0.1315                             & 0.1257 & 0.1355 & 112   & 132   & 110   & 132   & 110   & 132   & 107   & 132   \\
-    % size08_18.in
-    8                         & 53                                        & 0.1200                          & 0.1251                             & 0.1680 & 0.1799 & 69    & 87    & 473   & 588   & 61    & 81    & 469   & 588   \\
-    % size10_34.in
-    10                        & 78                                        & 0.1300                          & 0.1369                             & 0.1511 & 0.1635 & 112   & 117   & 334   & 353   & 105   & 111   & 328   & 353   \\
-    % size10_42.in
-    10                        & 81                                        & 0.1375                          & 0.1391                             & 1.736  & 2.361  & 103   & 135   & 13053 & 15543 & 91    & 125   & 13047 & 15543 \\
-    % size12_04.in
-    12                        & 114                                       & 0.8525                          & 1.038                              & 1.161  & 1.524  & 4364  & 5718  & 7505  & 9069  & 4352  & 5707  & 7495  & 9069  \\
-    % size12_02.in
-    12                        & 116                                       & 3.487                           & 4.547                              & 4.960  & 7.413  & 21403 & 28066 & 38152 & 47097 & 21393 & 28057 & 38143 & 47097 \\
-    % t13.in
-    31                        & 180                                       & 0.1956                          & 0.1927                             & 0.1878 & 0.1885 & 180   & 180   & 180   & 180   & 180   & 180   & 180   & 180   \\
-    \bottomrule
-  \end{tabular}
-\end{adjustbox} \\
+Os resultados podem ser observados na tabela e nos gráficos em anexo.
 
 \subsection{Análise de Resultados}
 
@@ -226,6 +194,44 @@ esparsos.
 \clearpage
 
 \section*{Anexo}
+
+\begin{adjustbox}{width={\textwidth}, totalheight={\textheight}, keepaspectratio}
+  \begin{tabular}{ll cccc cccc cccc}
+    \toprule
+    \multicolumn{2}{l}{Input} & \multicolumn{4}{c}{Tempo de Execução (s)} & \multicolumn{4}{c}{Nós Gerados} & \multicolumn{4}{c}{Nós Expandidos}                                                                                   \\
+    \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-10} \cmidrule(lr){11-14}
+    N                         & d                                         & GS                              & A*                                 & DFS    & BFS    & GS    & A*    & DFS   & BFS   & GS    & A*    & DFS   & BFS   \\
+    \midrule
+    % size04_09.in
+    4                         & 11                                        & 0.1152                          & 0.1126                             & 0.1127 & 0.1125 & 11    & 11    & 11    & 11    & 11    & 11    & 11    & 11    \\
+    % size04_22.in
+    4                         & 12                                        & 0.1174                          & 0.1188                             & 0.1161 & 0.1166 & 12    & 12    & 12    & 12    & 12    & 12    & 12    & 12    \\
+    % size06_18.in
+    6                         & 27                                        & 0.1168                          & 0.1323                             & 0.1169 & 0.1194 & 27    & 27    & 27    & 27    & 27    & 27    & 27    & 27    \\
+    % size06_38.in
+    6                         & 30                                        & 0.1207                          & 0.1213                             & 0.1160 & 0.1172 & 33    & 33    & 33    & 33    & 32    & 32    & 33    & 33    \\
+    % size08_49.in
+    8                         & 49                                        & 0.1270                          & 0.1315                             & 0.1257 & 0.1355 & 112   & 132   & 110   & 132   & 110   & 132   & 107   & 132   \\
+    % size08_18.in
+    8                         & 53                                        & 0.1200                          & 0.1251                             & 0.1680 & 0.1799 & 69    & 87    & 473   & 588   & 61    & 81    & 469   & 588   \\
+    % size10_34.in
+    10                        & 78                                        & 0.1300                          & 0.1369                             & 0.1511 & 0.1635 & 112   & 117   & 334   & 353   & 105   & 111   & 328   & 353   \\
+    % size10_42.in
+    10                        & 81                                        & 0.1375                          & 0.1391                             & 1.736  & 2.361  & 103   & 135   & 13053 & 15543 & 91    & 125   & 13047 & 15543 \\
+    % size12_04.in
+    12                        & 114                                       & 0.8525                          & 1.038                              & 1.161  & 1.524  & 4364  & 5718  & 7505  & 9069  & 4352  & 5707  & 7495  & 9069  \\
+    % size12_02.in
+    12                        & 116                                       & 3.487                           & 4.547                              & 4.960  & 7.413  & 21403 & 28066 & 38152 & 47097 & 21393 & 28057 & 38143 & 47097 \\
+    % t13.in
+    31                        & 180                                       & 0.1956                          & 0.1927                             & 0.1878 & 0.1885 & 180   & 180   & 180   & 180   & 180   & 180   & 180   & 180   \\
+    \bottomrule
+  \end{tabular}
+\end{adjustbox} \\
+
+\begin{center}
+  Table 1:\quad Resultados obtidos (Tempo de Execução, Nós Gerados e Expandidos) experimentalmente para vários tabuleiros
+  para 4 procuras diferentes (\textit{Greedy Search}, A*, DFS e BFS)
+\end{center}
 
 \begin{figure}[h]%
   \centering
