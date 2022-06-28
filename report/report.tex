@@ -160,11 +160,11 @@ as procuras são equiparáveis, visto que só há um caminho por onde seguir.
 
 Podemos observar também o contrário: no caso do tabuleiro de tamanho \(12 \times 12\), com \(116\) posições
 livres, vamos ter uma árvore de procura significamente maior do que para o caso analisado anteriormente,
-em que o fator de ramificação será maior que 1 (para a \textit{greedy search} neste tabuleiro, o
-fator de ramificação será aproximadamente \(1.0898\)).
+em que o fator de ramificação é maior que 1 (para este tabuleiro, o fator de ramificação é,
+aproximadamente, \(b \approx 47097^{\frac{1}{116}} \approx 1.097\)).
 Neste caso, as procuras informadas têm um desempenho melhor, devido à heurística escolhida.
 Assim, a \textbf{procura mais eficiente é a \textit{Greedy Search}}, seguida da A*.
-De seguida, temos a DFS e por último, como seria de esperar visto que a solução encontra-se
+De seguida, temos a DFS e por último, como seria de esperar visto que a solução se encontra
 à profundidade máxima da árvore, a BFS.
 
 \section{Conclusões}
@@ -227,6 +227,8 @@ esparsos.
     \bottomrule
   \end{tabular}
 \end{adjustbox} \\
+
+\vspace{-0.5cm}
 
 \begin{center}
   Table 1:\quad Resultados obtidos (Tempo de Execução, Nós Gerados e Expandidos) experimentalmente para vários tabuleiros
