@@ -64,6 +64,25 @@ Uma \textbf{ação} é representada pelo tuplo \texttt{(x, y, value)}, e consist
 numa posição livre do tabuleiro \texttt{(x, y)}. O \textbf{resultado} de uma dada ação consiste na
 atribuição do valor \texttt{value} à posição \texttt{(x, y)} a uma cópia do estado do nó pai.
 
+\begin{itemize}
+  \setlength\itemsep{0em}
+  \item Variáveis: \(N^2\) variáveis, representadas por \(X_{ij}\) com \(0 \leq i,j < N\), em que \(X_{i,j}\)
+        corresponde à posição do tabuleiro na linha \(i\) e coluna \(j\).
+  \item Domínio das variáveis: \(\{1, 2\}\)
+  \item Restrições: Número igual (ou que difere por um, caso \(N\) seja ímpar) de 0s e 1s em cada linha e coluna:
+        \(\forall_{0\leq i < N}, \lfloor \frac{N}{2} \rfloor \leq X_{i1} + \dots + X_{i(N-1)} \leq \lceil \frac{N}{2} \rceil\)
+        e
+        \(\forall_{0\leq j < N}, \lfloor \frac{N}{2} \rfloor \leq X_{1j} + \dots + X_{(N-1)j} \leq \lceil \frac{N}{2} \rceil\).
+        Não pode haver mais que dois números adjacentes:
+        \(\forall_{0\leq i < N, 1\leq j < N-1}, X_{i(j-1)} \ne X_{ij} \lor X_{ij} \ne X_{i(j+1)}\)
+        e
+        \(\forall_{1\leq i < N-1, 0\leq j < N}, X_{(i-1)j} \ne X_{ij} \lor X_{ij} \ne X_{(i+1)j}\).
+        Todas as colunas e todas as linhas têm de ser diferentes:
+        \(\op{AllDiff}(\forall_{0\leq i < N} \{X_{i1}, \dots, X_{i(N-1)}\}) \)
+        e
+        \(\op{AllDiff}(\forall_{0\leq j < N} \{X_{1j}, \dots, X_{(N-1)j}\}) \).
+\end{itemize}
+
 \section{Estratégia de Solução}
 
 Ao modelar uma solução para o problema em questão, que se tomou como um \textbf{Problema de Satisfação de Restrições (CSP)},
